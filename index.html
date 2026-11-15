@@ -286,6 +286,7 @@ html.stbig .top h1{transform:scale(var(--sts,1.12))}
 html.sthide .top h1{transform-origin:0 50%}
 html.sthide .top>*{opacity:0;animation:stShow .01s 20s forwards}
 @keyframes stShow{to{opacity:1}}
+.fmtinfo{margin:8px 0 2px;font-size:13px}.fmtinfo>summary{cursor:pointer;font-weight:700;color:inherit}.fmtinfo .fmtb{padding:6px 2px 2px;line-height:1.45}.fmtinfo .fmtb p{margin:6px 0;font-size:12.5px}
 #stiv{position:fixed;inset:0;z-index:9999;pointer-events:none;overflow:hidden}
 #stiv i{position:absolute;display:block}
 @media print{html.stcover::after,#stiv{display:none}html.sthide .top>*{opacity:1}}
@@ -803,8 +804,9 @@ body::before,:root.first body::before{display:none!important}
 
 <div id="cfgcard" class="card cfgrail"><div class="cr-in"><div class="cr-k">Cotação VINCI</div><div class="cr-pxw"><span class="cr-pr"><input id="px" class="cr-px" type="text" inputmode="none" readonly tabindex="-1" aria-readonly="true" aria-label="Cotação atual da VINCI em euros (automática)"><span class="cr-eur">€</span></span><span class="cr-var" id="cvar"></span></div><div id="pxinfo" class="pxi"></div><div class="cr-sep"></div><label class="cr-row">Taxa de imposto (%)<input id="rate" type="number" step="0.5" min="0"></label><label class="cr-row">Colaborador<select id="emp"><option value="1">Sim</option><option value="2">Saí (com compensação)</option><option value="0">Saí (demissão/justa causa)</option></select></label><div class="cr-foot"><a href="https://www.google.com/search?q=acoes+vinci" target="_blank" rel="noopener">ver no Google</a></div></div></div>
 
-<details id="impcard" class="card gl cs" open><summary><h2><b>Importar extrato</b>Castor International (Amundi)</h2><span class="sum" id="sm_imp">PDF da Amundi/Castor, texto colado ou ficheiros arrastados</span></summary>
-<div id="dzrow" class="dzrow"><p class="note wel" id="welcome"><b>Como começar:</b> arraste o seu primeiro extrato para a zona abaixo (ou registe uma operação à mão, mais abaixo). A página lê, organiza e vai mostrar os quadros — posição, resgates, bonificações, verificações — à medida que tiver dados.</p><label id="dz" class="dz"><svg class="marq" aria-hidden="true"><rect/></svg><span class="dzd">Arraste aqui os extratos (PDF) ou clique para escolher</span><span class="dzt">Toque para escolher os extratos (PDF)</span><small class="dzd">Pode largar vários ficheiros de uma vez. Cada um é acrescentado à lista.</small><input id="pdf" type="file" accept="application/pdf,.txt" multiple style="display:none"></label></div>
+<details id="impcard" class="card gl cs" open><summary><h2><b>Importar extrato</b>Castor International (Amundi)</h2><span class="sum" id="sm_imp">PDF da Amundi/Castor, Excel, texto colado ou ficheiros arrastados</span></summary>
+<div id="dzrow" class="dzrow"><p class="note wel" id="welcome"><b>Como começar:</b> arraste o seu primeiro extrato para a zona abaixo (ou registe uma operação à mão, mais abaixo). A página lê, organiza e vai mostrar os quadros — posição, resgates, bonificações, verificações — à medida que tiver dados.</p><label id="dz" class="dz"><svg class="marq" aria-hidden="true"><rect/></svg><span class="dzd">Arraste aqui os extratos (PDF ou Excel) ou clique para escolher</span><span class="dzt">Toque para escolher os extratos (PDF ou Excel)</span><small class="dzd">Pode largar vários ficheiros de uma vez. Cada um é acrescentado à lista.</small><input id="pdf" type="file" accept="application/pdf,.txt,.xlsx,.csv" multiple style="display:none"></label></div>
+<details id="fmtinfo" class="fmtinfo"><summary>Que ficheiros posso usar?</summary><div class="fmtb"><p><b>PDF do extrato</b> (recomendado): o que descarrega na área da Castor/Amundi. É o caminho mais simples: a página lê e explica.</p><p><b>Excel (.xlsx) ou CSV</b>, para quem já tem as operações numa folha: precisa das colunas <b>Data, Tipo, Quantidade, Preço unitário</b> (Comissões e Disponível desde são opcionais). O Excel exportado por esta página, na folha «Operações», já tem este formato.</p><p><b>Não são lidos:</b> fotografias, capturas de ecrã e PDFs digitalizados (sem texto), porque um número mal lido estragaria o cálculo.</p><p>Antes de acrescentar, veja sempre o que foi lido e confirme. Nada é guardado sem a sua confirmação.</p><p><button type="button" class="g" id="modelob">Descarregar modelo de Excel</button></p></div></details>
 <details id="xd"><summary>Ou cole aqui o texto do extrato</summary><textarea id="xtxt" rows="5"></textarea><p><button class="g" id="xread">Ler texto</button></p></details>
 <label style="text-transform:none;font-size:12px;margin-top:8px"><input type="checkbox" id="xsnap" style="width:auto"> Usar o saldo de extrato como saldo inicial (o do primeiro extrato depois de eventuais anos em falta)</label>
 <div id="xprev" style="margin-top:10px"></div>
@@ -1142,7 +1144,7 @@ function openData(){
   const prN=pr&&pr.data&&Array.isArray(pr.data.ops)?pr.data.ops.length:0,loc=AUTOMIG?readLocal():null,locOk=!!(loc&&hasData(loc));
   const rec=(prN>0||locOk)?'<fieldset><legend>Recuperar</legend>'+(prN>0?'<p class="note">Cópia automática de antes do último reset ('+new Date(pr.at).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'): '+prN+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recpre" class="g">Recuperar dados de antes do reset</button></div>':'')+(locOk?'<p class="note">Cópia guardada neste navegador (antes de usar a conta): '+loc.ops.length+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recloc" class="g">Recuperar a cópia deste navegador</button></div>':'')+'<p class="note" id="recmsg" style="min-height:1.2em"></p></fieldset>':'';
   const nm=LOCALONLY?'<fieldset><legend>O seu nome</legend><div class="exact" style="justify-content:flex-start;flex-wrap:wrap;align-items:center"><input id="whoin" type="text" maxlength="12" placeholder="ex.: Maria" autocomplete="off" style="font-size:15px;padding:8px 10px;min-width:0;flex:1 1 140px"><button type="button" id="whosave" class="g">Guardar nome</button></div><p class="note" style="margin:6px 0 0">Fica só neste aparelho. Serve para lhe dizer, da próxima vez, se está a retomar a sua sessão.</p></fieldset>':'';
-  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-15 19:20 (entrada I1: emerge do negro)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
+  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-15 20:40 (limpar exemplo/simulação)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
   document.body.appendChild(m);
   m.querySelector('#bkgo').onclick=bkDownload;
   m.querySelector('#bkld').onclick=()=>m.querySelector('#bkfile').click();
@@ -2043,7 +2045,7 @@ function renderImpState(){
   const cf=document.getElementById('cfgcard');if(cf)cf.classList.toggle('bright',has);
   const bv=document.getElementById('bvr');if(bv)bv.classList.toggle('calm',has);
   const dr=document.getElementById('dzrow');if(dr)dr.classList.toggle('calm',has);
-  const s=document.getElementById('sm_imp');if(s){const tc=window.matchMedia&&matchMedia('(hover:none) and (pointer:coarse)').matches;s.textContent=has?(tc?'PDF da Amundi/Castor ou texto colado':'PDF da Amundi/Castor, texto colado ou ficheiros arrastados'):(tc?'▶ Comece aqui: toque para escolher o primeiro extrato':'▶ Comece aqui: arraste o seu primeiro extrato')}
+  const s=document.getElementById('sm_imp');if(s){const tc=window.matchMedia&&matchMedia('(hover:none) and (pointer:coarse)').matches;s.textContent=has?(tc?'PDF da Amundi/Castor, Excel ou texto colado':'PDF da Amundi/Castor, Excel, texto colado ou ficheiros arrastados'):(tc?'▶ Comece aqui: toque para escolher o primeiro extrato':'▶ Comece aqui: arraste o seu primeiro extrato')}
 }
 let VISPREV=null;
 const TGROUPS=[['A minha carteira hoje',['cd_open','cd_rep','cd_pend','cd_sim']],['Resgates e registos',['cd_real','cd_pair','cd_ops','cd_new']],['Impostos',['cd_years','cd_div','cd_irs']],['Controlo e ajuda',['cd_amu','cd_chk','glcard','cd_links']]];
@@ -2383,7 +2385,7 @@ function addX(txt,name){
 }
 function finalItems(){
   let src=XP.items;
-  const useSnap=$('xsnap')&&$('xsnap').checked;
+  const useSnap=$('xsnap')&&$('xsnap').checked&&!XP.sheet;
   const uni=XP.files.filter(f=>f.dt).map(f=>({dt:f.dt,ov:f.ov,snap:f.snap})).concat((cfg.stm||[]).filter(z=>!XP.files.some(f=>f.dt===z.dt)).map(z=>({dt:z.dt,ov:z.ov,snap:null}))).sort((a,b)=>a.dt.localeCompare(b.dt));
   let k=uni.length-1;while(k>0&&(+uni[k].dt.slice(0,4)-+uni[k-1].dt.slice(0,4))<=1)k--;
   const sf=uni[k];
@@ -2446,6 +2448,7 @@ function showX(){
   h+='<p class="note" style="margin:8px 0 4px"><b>A adicionar ('+newIts.length+')</b></p>'+(prows.length?table(['Tipo','Data','Qtd.','Preço','Disponível a partir de'],prows):'<p class="note">Nada de novo: tudo o que está nos ficheiros já estava registado.</p>');
   if(dupIts.length)h+='<details><summary>'+dupIts.length+' já registadas (serão ignoradas)</summary>'+table(['Tipo','Data','Qtd.','Preço','Disponível a partir de'],dupIts.map(x=>prow(x,false)))+'</details>';
   if(XP.notes.length)h+='<p class="note"><b>Ajustes automáticos (quantidade e preço trocados):</b><br>'+XP.notes.join('<br>')+'</p>';
+  if(XP.snotes&&XP.snotes.length)h+='<p class="note"><b>Sobre a folha de cálculo:</b><br>'+XP.snotes.join('<br>')+'</p>';
   if(XP.ign.length)h+='<p class="note">Movimentos não importados (mecânica do fundo): '+XP.ign.length+'.</p>';
   if(sp.clash.length)h+='<p class="warn">'+sp.clash.length+' subscrição(ões) em anos que já têm uma: não serão carregadas já. '+sp.clash.map(x=>D(x.d)).join(', ')+'. Ficam em Verificações para confirmar.</p>';
   h+='</div>';
@@ -2468,17 +2471,199 @@ async function pdfText(file){
   }
   return out;
 }
+
+/* --- folhas de cálculo (Excel .xlsx / CSV): leitura e modelo, sem bibliotecas externas --- */
+const SHEETNORM=x=>String(x==null?'':x).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+function zipIndex(buf){
+  const dv=new DataView(buf),u8=new Uint8Array(buf);let e=u8.length-22;
+  while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;
+  if(e<0)throw new Error('zip');
+  const n=dv.getUint16(e+10,true),files={};let p=dv.getUint32(e+16,true);
+  for(let i=0;i<n;i++){
+    if(dv.getUint32(p,true)!==0x02014b50)throw new Error('zip');
+    const meth=dv.getUint16(p+10,true),csz=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),el=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lo=dv.getUint32(p+42,true);
+    files[new TextDecoder().decode(u8.subarray(p+46,p+46+nl))]={meth,csz,lo};p+=46+nl+el+cl;
+  }
+  return files;
+}
+async function zipText(buf,files,name){
+  const f=files[name];if(!f)return null;const dv=new DataView(buf);
+  const st=f.lo+30+dv.getUint16(f.lo+26,true)+dv.getUint16(f.lo+28,true),data=new Uint8Array(buf,st,f.csz);
+  if(f.meth===0)return new TextDecoder().decode(data);
+  if(f.meth!==8||typeof DecompressionStream==='undefined')throw new Error('zip-method');
+  const ds=new DecompressionStream('deflate-raw'),w=ds.writable.getWriter();w.write(data);w.close();
+  return new TextDecoder().decode(await new Response(ds.readable).arrayBuffer());
+}
+const colIdx=r=>{const m=/^([A-Z]+)/.exec(r||'');let n=0;if(m)for(const ch of m[1])n=n*26+ch.charCodeAt(0)-64;return n-1};
+async function xlsxSheets(buf){   // devolve [{name,rows:[[valor,…],…]}]
+  const files=zipIndex(buf),P=t=>new DOMParser().parseFromString(t,'application/xml');
+  const wb=P(await zipText(buf,files,'xl/workbook.xml')),rl=P((await zipText(buf,files,'xl/_rels/workbook.xml.rels'))||'<r/>');
+  const ssT=await zipText(buf,files,'xl/sharedStrings.xml'),ss=ssT?[...P(ssT).getElementsByTagName('si')].map(si=>[...si.getElementsByTagName('t')].map(t=>t.textContent).join('')):[];
+  const rel={};[...rl.getElementsByTagName('Relationship')].forEach(r=>{rel[r.getAttribute('Id')]=r.getAttribute('Target')});
+  const out=[];
+  for(const sh of [...wb.getElementsByTagName('sheet')]){
+    let tg=rel[sh.getAttribute('r:id')]||rel[sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id')];if(!tg)continue;
+    tg=tg.replace(/^\//,'');const path=tg.startsWith('xl/')?tg:'xl/'+tg;
+    const tx=await zipText(buf,files,path);if(!tx)continue;
+    const rows=[];
+    [...P(tx).getElementsByTagName('row')].forEach(r=>{
+      const ri=(+r.getAttribute('r')||rows.length+1)-1,arr=[];
+      [...r.getElementsByTagName('c')].forEach(c=>{
+        const t=c.getAttribute('t'),v=c.getElementsByTagName('v')[0],ci=colIdx(c.getAttribute('r'));let val='';
+        if(t==='s'&&v)val=ss[+v.textContent]||'';
+        else if(t==='inlineStr')val=[...c.getElementsByTagName('t')].map(x=>x.textContent).join('');
+        else if(t==='str'&&v)val=v.textContent;
+        else if(t==='b'&&v)val=v.textContent==='1'?'Sim':'Não';
+        else if(t==='e')val='';
+        else if(v&&v.textContent!==''){const n=parseFloat(v.textContent);val=isNaN(n)?v.textContent:n}
+        arr[ci<0?arr.length:ci]=val;
+      });
+      rows[ri]=arr;
+    });
+    out.push({name:sh.getAttribute('name')||'',rows:Array.from(rows,r=>r||[])});
+  }
+  return out;
+}
+function csvRows(txt){
+  txt=txt.replace(/^﻿/,'');const l1=txt.split(/\r?\n/)[0]||'';
+  const dl=(l1.split(';').length>l1.split(',').length)?';':(l1.split('\t').length>l1.split(',').length?'\t':',');
+  const rows=[];let row=[],cur='',q=false;
+  for(let i=0;i<txt.length;i++){const ch=txt[i];
+    if(q){if(ch==='"'){if(txt[i+1]==='"'){cur+='"';i++}else q=false}else cur+=ch}
+    else if(ch==='"')q=true;
+    else if(ch===dl){row.push(cur);cur=''}
+    else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&txt[i+1]==='\n')i++;row.push(cur);rows.push(row);row=[];cur=''}
+    else cur+=ch}
+  if(cur!==''||row.length){row.push(cur);rows.push(row)}
+  return rows.map(r=>r.map(c=>c.trim()));
+}
+const sNum=v=>{
+  if(typeof v==='number')return isFinite(v)?v:null;
+  let t=String(v==null?'':v).replace(/[€\s ]/g,'');if(!t)return null;
+  if(t.includes(','))t=t.replace(/\./g,'').replace(',','.');
+  const n=parseFloat(t);return /^-?[\d.]+(e-?\d+)?$/i.test(t)&&isFinite(n)?n:null;
+};
+function sDate(v){
+  let d=null,dd=0;
+  if(typeof v==='number'){if(v>20000&&v<80000)d=new Date(Math.round(Math.floor(v)*864e5)-25569*864e5)}
+  else{const t=String(v==null?'':v).trim();let m;
+    if((m=/^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t))){d=new Date(Date.UTC(+m[1],+m[2]-1,+m[3]));dd=+m[3]}
+    else if((m=/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/.exec(t))){d=new Date(Date.UTC(+m[3],+m[2]-1,+m[1]));dd=+m[1]}
+    if(d&&d.getUTCDate()!==dd)d=null}   // 31/02 e semelhantes
+  if(!d||isNaN(d))return null;
+  if(d.getUTCFullYear()<1995||d.getTime()>Date.now()+864e5)return null;
+  return d.toISOString().slice(0,10);
+}
+const SHEETTYPES={compra:'C',compras:'C',c:'C',bonificada:'B',bonificadas:'B',bonificacao:'B',bonus:'B',b:'B',dividendo:'D',dividendos:'D',d:'D',resgate:'V',resgates:'V',venda:'V',v:'V','saldo inicial':'S',s:'S'};
+function sheetHeader(rows){
+  for(let i=0;i<Math.min(rows.length,12);i++){
+    const h=(rows[i]||[]).map(SHEETNORM),f=fn=>h.findIndex(fn);
+    const c={d:f(x=>x==='data'),t:f(x=>x==='tipo'),q:f(x=>/^(quantidade|qtd|unidades|up)\b/.test(x)),p:f(x=>/^(preco|cotacao|valor unitario)/.test(x)),f:f(x=>/^comiss/.test(x)),l:f(x=>/^disponivel/.test(x))};
+    if(c.d>=0&&c.t>=0&&c.q>=0&&c.p>=0)return{row:i,c};
+  }
+  return null;
+}
+function sheetItems(sheets){   // converte as linhas em operações; devolve {items,notes} ou null se nenhuma folha tiver o formato
+  const cand=sheets.map(s=>({s,h:sheetHeader(s.rows)})).filter(x=>x.h).sort((a,b)=>(/oper|modelo/i.test(b.s.name)?1:0)-(/oper|modelo/i.test(a.s.name)?1:0));
+  if(!cand.length)return null;
+  const {s:sh,h}=cand[0],items=[],notes=[];let bad=0,adj=0,sk=0;
+  sh.rows.slice(h.row+1).forEach((r,k)=>{
+    const ln=h.row+k+2,cell=i=>i>=0?r[i]:'';
+    if(!r.some(x=>x!==''&&x!=null))return;
+    const tt=SHEETNORM(cell(h.c.t));
+    if(!tt)return;
+    if(/ajuste/.test(tt)){adj++;return}
+    const t=SHEETTYPES[tt],d=sDate(cell(h.c.d)),q=sNum(cell(h.c.q)),p=sNum(cell(h.c.p)),f=h.c.f>=0?sNum(cell(h.c.f)):0;
+    const why=!t?'tipo «'+cell(h.c.t)+'» desconhecido':!d?'data inválida':!(q>0)?'quantidade inválida':!(p>=0)?'preço inválido':null;
+    if(why){sk++;if(bad<8)notes.push('Linha '+ln+' ignorada: '+why+'.');bad++;return}
+    const o={t,d,q:Math.round(q*1e4)/1e4,p:Math.round(p*1e4)/1e4,f:Math.round((f||0)*100)/100};
+    if(h.c.l>=0){const dd=sDate(cell(h.c.l));if(dd&&t!=='V')o.disp=dd}
+    items.push(o);
+  });
+  if(bad>8)notes.push('… e mais '+(bad-8)+' linhas ignoradas.');
+  if(adj)notes.push(adj+(adj===1?' linha de «Ajuste estimado» não foi importada':' linhas de «Ajuste estimado» não foram importadas')+' (são estimativas da própria página).');
+  return{items,notes,sheet:sh.name};
+}
+async function sheetFile(f){
+  let sheets;
+  if(/\.csv$/i.test(f.name))sheets=[{name:'csv',rows:csvRows(await f.text())}];
+  else{
+    try{sheets=await xlsxSheets(await f.arrayBuffer())}
+    catch(e){
+      try{await loadScript(XLSXURL);const X=window.XLSX,wb=X.read(await f.arrayBuffer(),{type:'array'});
+        sheets=wb.SheetNames.map(n=>({name:n,rows:X.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:''})}))}
+      catch(e2){throw new Error('xlsx')}
+    }
+  }
+  return sheetItems(sheets);
+}
+function addSheet(r,name){
+  XP=XP||{items:[],ign:[],files:[],doubts:[],notes:[]};XP.sheet=true;
+  r.items.forEach(x=>{if(!XP.items.some(y=>ik(y)===ik(x)&&!y._sh))XP.items.push(Object.assign({_sh:1},x))});
+  XP.snotes=XP.snotes||[];r.notes.forEach(n=>{if(!XP.snotes.includes(n))XP.snotes.push(n)});
+  const n='Com folha de cálculo, o saldo inicial do extrato não é usado: todas as linhas da folha são importadas.';if(!XP.snotes.includes(n))XP.snotes.push(n);
+  XP.files.push({name,dt:null,qty:null,found:r.items.length,snap:[],ov:0});
+}
+/* modelo em branco (.xlsx escrito à mão: zip sem compressão) */
+const CRC=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+const crc32=u=>{let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRC[(c^u[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0};
+function zipStore(list){
+  const enc=new TextEncoder(),parts=[],cen=[];let off=0;
+  list.forEach(([name,text])=>{
+    const nm=enc.encode(name),d=enc.encode(text),crc=crc32(d),h=new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint32(14,crc,true);h.setUint32(18,d.length,true);h.setUint32(22,d.length,true);h.setUint16(26,nm.length,true);
+    parts.push(new Uint8Array(h.buffer),nm,d);
+    const c=new DataView(new ArrayBuffer(46));
+    c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint32(16,crc,true);c.setUint32(20,d.length,true);c.setUint32(24,d.length,true);c.setUint16(28,nm.length,true);c.setUint32(42,off,true);
+    cen.push(new Uint8Array(c.buffer),nm);off+=30+nm.length+d.length;
+  });
+  const cs=cen.reduce((a,x)=>a+x.length,0),e=new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true);e.setUint16(8,list.length,true);e.setUint16(10,list.length,true);e.setUint32(12,cs,true);e.setUint32(16,off,true);
+  return new Blob(parts.concat(cen,[new Uint8Array(e.buffer)]));
+}
+async function modeloXlsx(){
+  const esc=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const is=(r,t,st)=>'<c r="'+r+'" t="inlineStr"'+(st?' s="'+st+'"':'')+'><is><t xml:space="preserve">'+esc(t)+'</t></is></c>';
+  const H=['Data','Tipo','Quantidade (UP)','Preço unitário (€)','Comissões (€)','Disponível desde'],L='ABCDEF';
+  const head='<row r="1">'+H.map((h,i)=>is(L[i]+'1',h,1)).join('')+'</row>';
+  const ws1='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols><col min="1" max="1" width="14" style="2" customWidth="1"/><col min="2" max="2" width="16" customWidth="1"/><col min="3" max="3" width="18" style="3" customWidth="1"/><col min="4" max="4" width="20" style="3" customWidth="1"/><col min="5" max="5" width="15" style="3" customWidth="1"/><col min="6" max="6" width="18" style="2" customWidth="1"/></cols><sheetData>'+head+'</sheetData><dataValidations count="1"><dataValidation type="list" allowBlank="1" showErrorMessage="1" errorTitle="Tipo" error="Escolha: Compra, Bonificada, Dividendo ou Resgate." sqref="B2:B2000"><formula1>"Compra,Bonificada,Dividendo,Resgate"</formula1></dataValidation></dataValidations></worksheet>';
+  const ins=[['Como preencher esta folha'],[''],['1. Uma linha por operação, na folha «Operações» (não mude os títulos da primeira linha).'],['2. Data: dia/mês/ano (por exemplo 02/07/2024).'],['3. Tipo: Compra, Bonificada, Dividendo ou Resgate (há uma lista de escolha).'],['4. Quantidade (UP): número de unidades do fundo. Num dividendo, as unidades que recebeu.'],['5. Preço unitário (€): valor de uma unidade nessa data.'],['6. Comissões (€) e Disponível desde: opcionais.'],['7. Guarde o ficheiro e arraste-o para «Importar extrato». A página mostra o que leu antes de acrescentar; nada é guardado sem confirmar.'],[''],['Exemplo: 02/07/2024 | Compra | 40 | 95,00 | 0 |']];
+  const ws2='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols><col min="1" max="1" width="110" customWidth="1"/></cols><sheetData>'+ins.map((r,i)=>'<row r="'+(i+1)+'">'+is('A'+(i+1),r[0],i===0?1:0)+'</row>').join('')+'</sheetData></worksheet>';
+  const N='xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"',R='http://schemas.openxmlformats.org/officeDocument/2006/relationships',X='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  const files=[
+   ['[Content_Types].xml',X+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'],
+   ['_rels/.rels',X+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="'+R+'/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+   ['xl/workbook.xml',X+'<workbook '+N+' xmlns:r="'+R+'"><sheets><sheet name="Operações" sheetId="1" r:id="rId1"/><sheet name="Instruções" sheetId="2" r:id="rId2"/></sheets></workbook>'],
+   ['xl/_rels/workbook.xml.rels',X+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="'+R+'/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="'+R+'/worksheet" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Type="'+R+'/styles" Target="styles.xml"/></Relationships>'],
+   ['xl/styles.xml',X+'<styleSheet '+N+'><numFmts count="2"><numFmt numFmtId="164" formatCode="dd/mm/yyyy"/><numFmt numFmtId="165" formatCode="#,##0.0000"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF587C28"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'],
+   ['xl/worksheets/sheet1.xml',ws1],['xl/worksheets/sheet2.xml',ws2]];
+  const msg=$('xmsg'),dl=await xDl();
+  if(!dl){msg.textContent='Descarga indisponível nesta vista.';return}
+  try{await dl.save({filename:'modelo_operacoes.xlsx',data:await zipStore(files).arrayBuffer()});msg.textContent='Modelo guardado: preencha a folha «Operações» e arraste-a para aqui.'}
+  catch(e){msg.textContent=(e&&e.code==='declined')?'':'Não foi possível criar o modelo.'}
+}
 async function handleFiles(all){
-  const fs=all.filter(f=>/\.(pdf|txt)$/i.test(f.name)||f.type==='application/pdf');
-  if(!fs.length){if(all.length)$('xprev').innerHTML='<p class="warn">Só aceito ficheiros PDF ou de texto (.txt).</p>';return}
+  const fs=all.filter(f=>/\.(pdf|txt|xlsx|csv)$/i.test(f.name)||f.type==='application/pdf');
+  const rej=all.filter(f=>!fs.includes(f));
+  if(!fs.length){if(all.length){const img=rej.some(f=>/^image\//.test(f.type)||/\.(jpe?g|png|heic|webp|gif|bmp)$/i.test(f.name));
+    $('xprev').innerHTML='<p class="warn"><b>Este tipo de ficheiro não é lido.</b> '+(img?'Fotografias e capturas de ecrã não são lidas com fiabilidade (um número mal lido estragaria o cálculo). ':'')+'Use o <b>PDF</b> do extrato (descarregado na área da Castor/Amundi), um <b>Excel (.xlsx) ou CSV</b> no formato do modelo, ou registe as operações à mão.</p>'}return}
   let i=0;
   for(const f of fs){i++;
     $('xprev').innerHTML='<p class="note">A ler '+f.name+' ('+i+'/'+fs.length+')…</p>';
-    try{const t=/\.txt$/i.test(f.name)?await f.text():await pdfText(f);addX(t,f.name)}
-    catch(x){$('xd').open=true;$('xprev').innerHTML='<p class="warn">Não consegui ler "'+f.name+'" aqui. Abra-o, copie o texto e cole na caixa abaixo, depois clique em "Ler texto".</p>';return}
+    try{
+      if(/\.(xlsx|csv)$/i.test(f.name)){
+        const r=await sheetFile(f);
+        if(!r){$('xprev').innerHTML='<p class="warn"><b>Não reconheci o formato de "'+f.name+'".</b> A folha precisa de colunas com os títulos <b>Data, Tipo, Quantidade, Preço unitário</b> (Comissões e Disponível desde são opcionais). Descarregue o modelo em «Que ficheiros posso usar?» e copie lá os seus dados.</p>';return}
+        if(!r.items.length){$('xprev').innerHTML='<p class="warn">Reconheci o formato de "'+f.name+'", mas não encontrei operações válidas.'+(r.notes.length?'<br>'+r.notes.join('<br>'):'')+'</p>';return}
+        addSheet(r,f.name);continue}
+      const t=/\.txt$/i.test(f.name)?await f.text():await pdfText(f);
+      if(/\.pdf$/i.test(f.name)||f.type==='application/pdf'){if(t.replace(/\s/g,'').length<30){$('xprev').innerHTML='<p class="warn"><b>"'+f.name+'" não tem texto para ler</b> (parece uma imagem ou um PDF digitalizado). Descarregue o extrato em PDF na área da Castor/Amundi (não uma fotografia nem uma digitalização), ou registe as operações à mão.</p>';return}}
+      addX(t,f.name)}
+    catch(x){$('xd').open=true;$('xprev').innerHTML=/\.(xlsx|csv)$/i.test(f.name)?'<p class="warn">Não consegui abrir "'+f.name+'". Confirme que é um Excel (.xlsx) ou CSV válido; se vier de outro programa, guarde-o de novo como .xlsx.</p>':'<p class="warn">Não consegui ler "'+f.name+'" aqui. Abra-o, copie o texto e cole na caixa abaixo, depois clique em "Ler texto".</p>';return}
   }
   showX();
 }
+$('modelob').onclick=modeloXlsx;
 $('pdf').onchange=e=>{const a=[...e.target.files];e.target.value='';handleFiles(a)};
 const dz=$('dz');
 ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over')}));
@@ -2542,7 +2727,9 @@ $('xclear').onclick=async()=>{
   const m=(XP?XP.items:[]).concat($('xtxt').value?parseExtrato($('xtxt').value).items:[]);
   const legacy=ops.filter(o=>!o.src&&m.some(x=>x.t===o.t&&x.d===o.d&&Math.abs(x.q-o.q)<1e-6&&Math.abs(x.p-o.p)<1e-6));
   const del=tag.concat(legacy);
-  if(!del.length){$('xmsg').textContent='Não há importações do extrato para limpar.';return}
+  if(!del.length){
+    if(WS==='sim'&&ops.length){await resetWS('sim');return}   // o Reset pede a sua própria confirmação
+    $('xmsg').textContent=ops.length?'Não há importações de extrato para limpar (os restantes registos são manuais). Para apagar tudo, use o Reset.':'Não há importações do extrato para limpar.';return}
   if(!(await ask('Remover '+del.length+' operações importadas do extrato?')))return;
   if(col){for(const o of del){try{await col.doc(o.id).delete()}catch(e){}}}
   else{const ids=new Set(del.map(o=>o.id));ALL=ALL.filter(o=>!ids.has(o.id));saveLocal();render()}
@@ -2939,7 +3126,7 @@ function updDock(){
   d.hidden=!(n>0||hasU);
   const u=document.getElementById('undob'),r=document.getElementById('rstb');
   if(u)u.disabled=!hasU;
-  if(r&&r.parentNode)r.parentNode.hidden=!(WS==='main'&&n>0);
+  if(r&&r.parentNode){r.parentNode.hidden=!(n>0);const dl=r.parentNode.querySelector('.dl');if(dl)dl.innerHTML=WS==='sim'?'<b>Reset</b> esvazia a folha de simulação (o exemplo também). Os registos reais não mudam.':'<b>Reset</b> esvazia “Os meus registos”. Pode ser anulado.'}
   if(was&&!d.hidden&&!DOCKSEEN){DOCKSEEN=true;setTimeout(()=>{if(INTRODONE)spotlight();else DOCKPEND=true},350)}
 }
 function dockHover(){
@@ -2986,7 +3173,7 @@ undoWrap($('wban'),e=>e.target&&e.target.id==='wcopy');
 undoWrap($('doimp'));
 undoWrap($('seed'));
 {const _rs=resetWS;resetWS=async function(w){pushUndo();UBATCH++;try{await _rs(w)}finally{UBATCH--}}}
-$('rstb').onclick=()=>{if(WS==='main')resetWS('main')};
+$('rstb').onclick=()=>resetWS(WS);
 $('undob').onclick=undoLast;
 document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&String(e.key).toLowerCase()==='z'&&!/INPUT|TEXTAREA|SELECT/.test((e.target&&e.target.tagName)||'')){e.preventDefault();undoLast()}
