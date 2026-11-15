@@ -798,7 +798,7 @@ body::before,:root.first body::before{display:none!important}
 /* Botão Instalar */
 #pwaw{margin-left:auto;position:relative;display:inline-flex}
 #pwai{position:relative;z-index:32;display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#ffe58f,#f0b429);color:#3b2a00;font-weight:800;font-size:11px;border:0;border-radius:999px;padding:5px 10px 5px 8px;white-space:nowrap;box-shadow:0 2px 10px rgba(240,180,41,.45),inset 0 1px 0 rgba(255,255,255,.6);cursor:pointer;transition:transform .8s cubic-bezier(.6,0,.25,1)}
-#pwai[hidden]{display:none}
+#pwai[hidden]{display:inline-flex!important;visibility:hidden;pointer-events:none}
 #pwai.shown{animation:pwaShow .6s ease both}
 @keyframes pwaShow{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 #pwai.lock{pointer-events:none}
@@ -1174,7 +1174,7 @@ function openData(){
   const prN=pr&&pr.data&&Array.isArray(pr.data.ops)?pr.data.ops.length:0,loc=AUTOMIG?readLocal():null,locOk=!!(loc&&hasData(loc));
   const rec=(prN>0||locOk)?'<fieldset><legend>Recuperar</legend>'+(prN>0?'<p class="note">Cópia automática de antes do último reset ('+new Date(pr.at).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'): '+prN+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recpre" class="g">Recuperar dados de antes do reset</button></div>':'')+(locOk?'<p class="note">Cópia guardada neste navegador (antes de usar a conta): '+loc.ops.length+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recloc" class="g">Recuperar a cópia deste navegador</button></div>':'')+'<p class="note" id="recmsg" style="min-height:1.2em"></p></fieldset>':'';
   const nm=LOCALONLY?'<fieldset><legend>O seu nome</legend><div class="exact" style="justify-content:flex-start;flex-wrap:wrap;align-items:center"><input id="whoin" type="text" maxlength="12" placeholder="ex.: Maria" autocomplete="off" style="font-size:15px;padding:8px 10px;min-width:0;flex:1 1 140px"><button type="button" id="whosave" class="g">Guardar nome</button></div><p class="note" style="margin:6px 0 0">Fica só neste aparelho. Serve para lhe dizer, da próxima vez, se está a retomar a sua sessão.</p></fieldset>':'';
-  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-15 23:59 (botão desliza na linha + Informação reluz)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
+  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 00:20 (recolha suave + botão só no fim)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
   document.body.appendChild(m);
   m.querySelector('#bkgo').onclick=bkDownload;
   m.querySelector('#bkld').onclick=()=>m.querySelector('#bkfile').click();
@@ -3458,26 +3458,31 @@ setTimeout(amuNudge,12500);
   function paint(){T.setAttribute('aria-expanded',open?'true':'false');cv.textContent=open?'▴':'▾';dot.hidden=open||!pills()}
   function rows(){return Array.from(P.children).filter(e=>!e.hidden&&e.offsetHeight>0)}
   function reset(){Array.from(P.children).forEach(e=>{e.style.cssText='';const m=e.querySelector&&e.querySelector('summary');if(m)m.style.cssText=''});P.style.cssText=''}
-  function fold(e){
+  const EASE='cubic-bezier(.45,0,.2,1)';
+  function fold(e,d){
+    d=d||450;
     e.style.overflow='hidden';e.style.maxHeight=e.offsetHeight+'px';void e.offsetHeight;
-    e.style.transition='max-height .45s ease,opacity .35s ease,padding .45s ease,border-width .45s ease';
-    e.style.maxHeight='0';e.style.opacity='0';e.style.paddingTop='0';e.style.paddingBottom='0';e.style.borderTopWidth='0';
-    const sm=e.querySelector&&e.querySelector('summary');if(sm){sm.style.transition='padding .45s ease';sm.style.paddingTop='0';sm.style.paddingBottom='0'}
+    e.style.transition='max-height '+d+'ms '+EASE+',opacity '+Math.round(d*.8)+'ms ease,padding '+d+'ms '+EASE+',border-width '+d+'ms '+EASE;
+    e.style.maxHeight='0';e.style.opacity='0';e.style.paddingTop='0';e.style.paddingBottom='0';e.style.borderTopWidth='0';e.style.borderBottomWidth='0';
+    const sm=e.querySelector&&e.querySelector('summary');if(sm){sm.style.transition='padding '+d+'ms '+EASE;sm.style.paddingTop='0';sm.style.paddingBottom='0'}
   }
   function show(){clear();open=true;P.classList.remove('gone');reset();requestAnimationFrame(()=>P.classList.remove('hid'));paint()}
   function hide(){
     open=false;paint();
     const r=rows().reverse(),STEP=650,DUR=450;   // de baixo para cima, em cadeia contínua
+    const last=r.length?r[r.length-1]:null;
+    const LD=last?Math.max(650,Math.min(950,Math.round(last.offsetHeight*13))):DUR;  // a última (a mais alta) recolhe mais devagar
     r.forEach((e,k)=>later(()=>{
-      if(open)return;fold(e);
+      if(open)return;
       if(k===r.length-1){                      // a última linha leva o painel consigo, sem pausa
-        P.style.transition='margin .45s ease,border-width .45s ease,opacity .45s ease';
+        fold(e,LD);
+        P.style.transition='margin '+LD+'ms '+EASE+',border-width '+LD+'ms '+EASE+',opacity '+LD+'ms ease';
         P.style.margin='0';P.style.borderWidth='0';P.style.opacity='0';
-      }
+      }else fold(e,DUR);
     },k*STEP));
-    later(()=>{if(!open){P.classList.add('gone');T.classList.remove('tglow');void T.offsetWidth;T.classList.add('tglow');setTimeout(()=>T.classList.remove('tglow'),1500)}},(r.length-1)*STEP+DUR+30);
+    later(()=>{if(!open){P.classList.add('gone');T.classList.remove('tglow');void T.offsetWidth;T.classList.add('tglow');setTimeout(()=>T.classList.remove('tglow'),1500);setTimeout(()=>document.dispatchEvent(new Event('infodone')),1500)}},(r.length-1)*STEP+LD+60);
   }
-  T.addEventListener('click',()=>{touched=true;open?hide():show()});
+  T.addEventListener('click',()=>{touched=true;document.dispatchEvent(new Event('infodone'));open?hide():show()});
   (function(){const go=()=>setTimeout(()=>{if(!touched&&open)hide()},2000);
     if(document.documentElement.classList.contains('stlock'))document.addEventListener('introend',go,{once:true});else go()})();
   try{new MutationObserver(paint).observe(P,{subtree:true,attributes:true,attributeFilter:['hidden']})}catch(e){}
@@ -3497,11 +3502,12 @@ setTimeout(amuNudge,12500);
   const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   const INTRO='<b>Pôr a Carteira no ecrã inicial</b><br>Fica um ícone como o de qualquer app e abre em ecrã inteiro. <b>Não importa extratos</b> nem descarrega ficheiros; os dados ficam só neste aparelho.';
   // o botão só aparece quando a página (e a abertura) terminaram
-  let loaded=document.readyState==='complete',intro=!document.documentElement.classList.contains('stlock'),shown=false;
-  const show=()=>{if(shown||!(loaded&&intro))return;shown=true;setTimeout(()=>{b.hidden=false;b.classList.add('shown');setTimeout(()=>b.classList.remove('shown'),700)},400)};
+  let loaded=document.readyState==='complete',intro=!document.documentElement.classList.contains('stlock'),info=false,shown=false;
+  const show=()=>{if(shown||!(loaded&&intro&&info))return;shown=true;setTimeout(()=>{b.hidden=false;b.classList.add('shown');setTimeout(()=>b.classList.remove('shown'),700)},400)};
   if(!loaded)window.addEventListener('load',()=>{loaded=true;show()},{once:true});
   if(!intro)document.addEventListener('introend',()=>{intro=true;show()},{once:true});
-  setTimeout(()=>{loaded=intro=true;show()},15000);
+  document.addEventListener('infodone',()=>{info=true;show()},{once:true});
+  setTimeout(()=>{loaded=intro=info=true;show()},20000);
   show();
   const back=()=>{b.classList.remove('lock','glow','inpanel');b.style.transform=''};
   const shut=()=>{tok++;h.hidden=true;back()};
