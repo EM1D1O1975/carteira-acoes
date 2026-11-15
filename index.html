@@ -1174,7 +1174,7 @@ function openData(){
   const prN=pr&&pr.data&&Array.isArray(pr.data.ops)?pr.data.ops.length:0,loc=AUTOMIG?readLocal():null,locOk=!!(loc&&hasData(loc));
   const rec=(prN>0||locOk)?'<fieldset><legend>Recuperar</legend>'+(prN>0?'<p class="note">Cópia automática de antes do último reset ('+new Date(pr.at).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'): '+prN+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recpre" class="g">Recuperar dados de antes do reset</button></div>':'')+(locOk?'<p class="note">Cópia guardada neste navegador (antes de usar a conta): '+loc.ops.length+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recloc" class="g">Recuperar a cópia deste navegador</button></div>':'')+'<p class="note" id="recmsg" style="min-height:1.2em"></p></fieldset>':'';
   const nm=LOCALONLY?'<fieldset><legend>O seu nome</legend><div class="exact" style="justify-content:flex-start;flex-wrap:wrap;align-items:center"><input id="whoin" type="text" maxlength="12" placeholder="ex.: Maria" autocomplete="off" style="font-size:15px;padding:8px 10px;min-width:0;flex:1 1 140px"><button type="button" id="whosave" class="g">Guardar nome</button></div><p class="note" style="margin:6px 0 0">Fica só neste aparelho. Serve para lhe dizer, da próxima vez, se está a retomar a sua sessão.</p></fieldset>':'';
-  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 00:20 (recolha suave + botão só no fim)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
+  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 00:45 (recolha num só movimento)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
   document.body.appendChild(m);
   m.querySelector('#bkgo').onclick=bkDownload;
   m.querySelector('#bkld').onclick=()=>m.querySelector('#bkfile').click();
@@ -3458,29 +3458,34 @@ setTimeout(amuNudge,12500);
   function paint(){T.setAttribute('aria-expanded',open?'true':'false');cv.textContent=open?'▴':'▾';dot.hidden=open||!pills()}
   function rows(){return Array.from(P.children).filter(e=>!e.hidden&&e.offsetHeight>0)}
   function reset(){Array.from(P.children).forEach(e=>{e.style.cssText='';const m=e.querySelector&&e.querySelector('summary');if(m)m.style.cssText=''});P.style.cssText=''}
-  const EASE='cubic-bezier(.45,0,.2,1)';
+  const EASE='linear';
   function fold(e,d){
     d=d||450;
     e.style.overflow='hidden';e.style.maxHeight=e.offsetHeight+'px';void e.offsetHeight;
-    e.style.transition='max-height '+d+'ms '+EASE+',opacity '+Math.round(d*.8)+'ms ease,padding '+d+'ms '+EASE+',border-width '+d+'ms '+EASE;
+    e.style.transition='max-height '+d+'ms linear,opacity '+d+'ms linear,padding '+d+'ms linear,border-width '+d+'ms linear';
     e.style.maxHeight='0';e.style.opacity='0';e.style.paddingTop='0';e.style.paddingBottom='0';e.style.borderTopWidth='0';e.style.borderBottomWidth='0';
-    const sm=e.querySelector&&e.querySelector('summary');if(sm){sm.style.transition='padding '+d+'ms '+EASE;sm.style.paddingTop='0';sm.style.paddingBottom='0'}
+    const sm=e.querySelector&&e.querySelector('summary');if(sm){sm.style.transition='padding '+d+'ms linear';sm.style.paddingTop='0';sm.style.paddingBottom='0'}
   }
   function show(){clear();open=true;P.classList.remove('gone');reset();requestAnimationFrame(()=>P.classList.remove('hid'));paint()}
   function hide(){
     open=false;paint();
-    const r=rows().reverse(),STEP=650,DUR=450;   // de baixo para cima, em cadeia contínua
-    const last=r.length?r[r.length-1]:null;
-    const LD=last?Math.max(650,Math.min(950,Math.round(last.offsetHeight*13))):DUR;  // a última (a mais alta) recolhe mais devagar
-    r.forEach((e,k)=>later(()=>{
-      if(open)return;
-      if(k===r.length-1){                      // a última linha leva o painel consigo, sem pausa
-        fold(e,LD);
-        P.style.transition='margin '+LD+'ms '+EASE+',border-width '+LD+'ms '+EASE+',opacity '+LD+'ms ease';
-        P.style.margin='0';P.style.borderWidth='0';P.style.opacity='0';
-      }else fold(e,DUR);
-    },k*STEP));
-    later(()=>{if(!open){P.classList.add('gone');T.classList.remove('tglow');void T.offsetWidth;T.classList.add('tglow');setTimeout(()=>T.classList.remove('tglow'),1500);setTimeout(()=>document.dispatchEvent(new Event('infodone')),1500)}},(r.length-1)*STEP+LD+60);
+    // uma única recolha contínua, de baixo para cima, a velocidade constante: cada linha começa quando a anterior acaba
+    const r=rows().reverse(),MS=11;
+    let t=0;
+    r.forEach((e,k)=>{
+      const d=Math.max(220,Math.round(e.offsetHeight*MS)),st=t;t+=d;
+      later(()=>{
+        if(open)return;
+        fold(e,d);
+        if(k===r.length-1){                      // a última linha leva o painel consigo
+          // o contorno de 1px não se anima: passa a sombra interior (que desvanece com o painel) e o espaço sai como padding
+          P.style.transition='none';P.style.boxShadow='inset 0 0 0 1px rgba(255,255,255,.14)';P.style.borderWidth='0';P.style.paddingBottom='2px';void P.offsetHeight;
+          P.style.transition='margin '+d+'ms linear,padding '+d+'ms linear,opacity '+d+'ms linear';
+          P.style.margin='0';P.style.paddingBottom='0';P.style.opacity='0';
+        }
+      },st);
+    });
+    later(()=>{if(!open){P.classList.add('gone');T.classList.remove('tglow');void T.offsetWidth;T.classList.add('tglow');setTimeout(()=>T.classList.remove('tglow'),1500);setTimeout(()=>document.dispatchEvent(new Event('infodone')),1500)}},t+60);
   }
   T.addEventListener('click',()=>{touched=true;document.dispatchEvent(new Event('infodone'));open?hide():show()});
   (function(){const go=()=>setTimeout(()=>{if(!touched&&open)hide()},2000);
