@@ -791,38 +791,34 @@ body::before,:root.first body::before{display:none!important}
 @media(hover:hover){#amunudge .amux:hover{background:#ea4538}}
 .xclose:focus-visible{outline-color:#ffd0cb}
 /* Esfera do perfil ao dobro */
-.top .whoav{scale:1.6;transform-origin:100% 0}
+.top .whoav{scale:1.6;transform-origin:100% 0;will-change:transform}
 .top h1{padding-right:90px}
 @media(min-width:561px){.top h1{padding-right:0}}
 
 /* Botão Instalar */
 #pwaw{margin-left:auto;position:relative;display:inline-flex}
-#pwai{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#ffe58f,#f0b429);color:#3b2a00;font-weight:800;font-size:11px;border:0;border-radius:999px;padding:5px 10px 5px 8px;white-space:nowrap;box-shadow:0 2px 10px rgba(240,180,41,.45),inset 0 1px 0 rgba(255,255,255,.6);cursor:pointer}
+#pwai{position:relative;z-index:32;display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#ffe58f,#f0b429);color:#3b2a00;font-weight:800;font-size:11px;border:0;border-radius:999px;padding:5px 10px 5px 8px;white-space:nowrap;box-shadow:0 2px 10px rgba(240,180,41,.45),inset 0 1px 0 rgba(255,255,255,.6);cursor:pointer;transition:transform .8s cubic-bezier(.6,0,.25,1)}
 #pwai[hidden]{display:none}
-#pwah{position:absolute;right:0;bottom:calc(100% + 10px);width:min(330px,calc(100vw - 24px));z-index:30;font-size:12.5px;line-height:1.45;background:#1d2a12;color:#fff;border:1px solid rgba(255,229,143,.55);border-radius:12px;padding:10px 12px;box-shadow:0 8px 26px rgba(0,0,0,.45)}
-#pwah.dn{bottom:auto;top:calc(100% + 10px)}
-#pwah.dn::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#1d2a12}
-#pwah::after{content:'';position:absolute;right:26px;top:100%;border:7px solid transparent;border-top-color:#1d2a12}
-#pwah[hidden]{display:none}
-#pwah b{font-weight:800}
-#pwah .pb{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
-#pwah .pb button{font-size:12px;font-weight:800;border:0;border-radius:999px;padding:6px 14px;cursor:pointer;background:rgba(255,255,255,.2);color:#fff}
-#pwah .pb #pwai{font-size:12px;padding:6px 14px 6px 12px;background:linear-gradient(135deg,#ffe58f,#f0b429);color:#3b2a00}
-#pwah .pb #pwai.glow{animation:pwaGlow 1s ease-in-out 1}
-@keyframes pwaMv{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
 #pwai.shown{animation:pwaShow .6s ease both}
 @keyframes pwaShow{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-#pwah{animation:pwaUp .35s ease both}
-@keyframes pwaUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-#pwah .w{opacity:0;animation:pwaW .3s ease forwards}
-@keyframes pwaW{to{opacity:1}}
-#pwah .pb{min-height:34px}
-#pwah .pb .no,#pwah .pb .ok{opacity:0;pointer-events:none;transition:opacity .35s}
-#pwah .pb.rdy .no,#pwah .pb.rdy .ok{opacity:1;pointer-events:auto}
-#pwah .pb #pwai.lock{pointer-events:none}
+#pwai.lock{pointer-events:none}
 #pwai.glow{animation:pwaGlow 1s ease-in-out 1}
 @keyframes pwaGlow{0%{box-shadow:0 2px 10px rgba(240,180,41,.45),0 0 0 0 rgba(255,229,143,.9)}45%{box-shadow:0 0 22px 6px rgba(255,229,143,.95),0 0 0 8px rgba(255,229,143,.35)}100%{box-shadow:0 2px 10px rgba(240,180,41,.45),0 0 0 14px rgba(255,229,143,0)}}
-#pwah .pb button.go{background:linear-gradient(135deg,#ffe58f,#f0b429);color:#3b2a00}
+/* janela: cobre a linha do botão e cresce para cima; o botão desliza na mesma linha */
+#pwah{position:absolute;right:-10px;bottom:-9px;width:min(330px,calc(100vw - 20px));z-index:30;font-size:12.5px;line-height:1.45;background:#1d2a12;color:#fff;border:1px solid rgba(255,229,143,.55);border-radius:14px;padding:10px 10px 9px 12px;box-shadow:0 8px 26px rgba(0,0,0,.45);animation:pwaUp .35s ease both}
+#pwah.up{bottom:calc(100% + 10px);right:0}
+#pwah[hidden]{display:none}
+#pwah b{font-weight:800}
+@keyframes pwaUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#pwah .w{opacity:0;animation:pwaW .3s ease forwards}
+@keyframes pwaW{to{opacity:1}}
+#pwah .pb{display:flex;align-items:center;gap:8px;margin-top:8px;height:var(--bh,26px)}
+#pwah .pb .sp{flex:none}
+#pwah .pb button{font-size:12px;font-weight:800;border:0;border-radius:999px;padding:6px 14px;cursor:pointer;background:rgba(255,255,255,.2);color:#fff}
+#pwah .pb .no,#pwah .pb .ok{opacity:0;pointer-events:none;transition:opacity .4s}
+#pwah .pb.rdy .no,#pwah .pb.rdy .ok{opacity:1;pointer-events:auto}
+#tinfoT.tglow{animation:tGlow 1.3s ease-in-out 1}
+@keyframes tGlow{0%{box-shadow:0 0 0 0 rgba(255,229,143,.9)}40%{box-shadow:0 0 20px 5px rgba(255,229,143,.9),0 0 0 7px rgba(255,229,143,.35)}100%{box-shadow:0 0 0 12px rgba(255,229,143,0)}}
 </style></head><body><main>
 <div class="top"><span class="tag">Ferramenta pessoal</span>
 <h1>Carteira de ações <b>da empresa</b></h1>
@@ -1178,7 +1174,7 @@ function openData(){
   const prN=pr&&pr.data&&Array.isArray(pr.data.ops)?pr.data.ops.length:0,loc=AUTOMIG?readLocal():null,locOk=!!(loc&&hasData(loc));
   const rec=(prN>0||locOk)?'<fieldset><legend>Recuperar</legend>'+(prN>0?'<p class="note">Cópia automática de antes do último reset ('+new Date(pr.at).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'): '+prN+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recpre" class="g">Recuperar dados de antes do reset</button></div>':'')+(locOk?'<p class="note">Cópia guardada neste navegador (antes de usar a conta): '+loc.ops.length+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recloc" class="g">Recuperar a cópia deste navegador</button></div>':'')+'<p class="note" id="recmsg" style="min-height:1.2em"></p></fieldset>':'';
   const nm=LOCALONLY?'<fieldset><legend>O seu nome</legend><div class="exact" style="justify-content:flex-start;flex-wrap:wrap;align-items:center"><input id="whoin" type="text" maxlength="12" placeholder="ex.: Maria" autocomplete="off" style="font-size:15px;padding:8px 10px;min-width:0;flex:1 1 140px"><button type="button" id="whosave" class="g">Guardar nome</button></div><p class="note" style="margin:6px 0 0">Fica só neste aparelho. Serve para lhe dizer, da próxima vez, se está a retomar a sua sessão.</p></fieldset>':'';
-  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-15 23:45 (botão instalar app em sequência)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
+  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-15 23:59 (botão desliza na linha + Informação reluz)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
   document.body.appendChild(m);
   m.querySelector('#bkgo').onclick=bkDownload;
   m.querySelector('#bkld').onclick=()=>m.querySelector('#bkfile').click();
@@ -3479,7 +3475,7 @@ setTimeout(amuNudge,12500);
         P.style.margin='0';P.style.borderWidth='0';P.style.opacity='0';
       }
     },k*STEP));
-    later(()=>{if(!open)P.classList.add('gone')},(r.length-1)*STEP+DUR+30);
+    later(()=>{if(!open){P.classList.add('gone');T.classList.remove('tglow');void T.offsetWidth;T.classList.add('tglow');setTimeout(()=>T.classList.remove('tglow'),1500)}},(r.length-1)*STEP+DUR+30);
   }
   T.addEventListener('click',()=>{touched=true;open?hide():show()});
   (function(){const go=()=>setTimeout(()=>{if(!touched&&open)hide()},2000);
@@ -3507,7 +3503,7 @@ setTimeout(amuNudge,12500);
   if(!intro)document.addEventListener('introend',()=>{intro=true;show()},{once:true});
   setTimeout(()=>{loaded=intro=true;show()},15000);
   show();
-  const back=()=>{b.classList.remove('lock','glow');if(b.parentNode!==home)home.insertBefore(b,h)};
+  const back=()=>{b.classList.remove('lock','glow','inpanel');b.style.transform=''};
   const shut=()=>{tok++;h.hidden=true;back()};
   // mostra o texto palavra a palavra; devolve o tempo total (ms)
   const wordify=el=>{let n=0;const walk=nd=>{[...nd.childNodes].forEach(c=>{
@@ -3515,24 +3511,28 @@ setTimeout(amuNudge,12500);
       else if(c.nodeType===1&&c.tagName!=='BR')walk(c)})};walk(el);return n*45+300};
   const open=(html,kind)=>{
     back();const my=++tok;
+    h.style.setProperty('--bh',b.offsetHeight+'px');
     h.innerHTML='<div class="tx">'+html+'</div><div class="pb"></div>';
-    h.classList.remove('dn');h.hidden=false;if(h.getBoundingClientRect().top<2)h.classList.add('dn');
+    h.classList.remove('up');h.hidden=false;
     const pb=h.querySelector('.pb'),dur=wordify(h.querySelector('.tx'));
     setTimeout(()=>{
       if(my!==tok)return;
       if(kind==='go'){
-        pb.insertBefore(b,null);b.classList.add('lock');b.style.animation='pwaMv .4s ease both';
-        setTimeout(()=>{if(my!==tok)return;b.style.animation='';b.classList.add('glow')},450);
+        // o botão desliza na mesma linha, da direita para a esquerda, até ao início da janela
+        const sp=document.createElement('span');sp.className='sp';sp.style.width=b.offsetWidth+'px';pb.appendChild(sp);
+        const dx=pb.getBoundingClientRect().left-b.getBoundingClientRect().left;
+        b.classList.add('lock','inpanel');b.style.transform='translateX('+dx+'px)';
+        setTimeout(()=>{if(my!==tok)return;b.classList.add('glow')},850);
         setTimeout(()=>{if(my!==tok)return;
           const n=document.createElement('button');n.type='button';n.className='no';n.textContent='Agora não';n.onclick=shut;pb.appendChild(n);
           void n.offsetWidth;pb.classList.add('rdy');b.classList.remove('lock','glow');
-        },1500);
+        },1950);
       }else{
         const n=document.createElement('button');n.type='button';n.className='ok';n.textContent='Percebi';n.onclick=shut;pb.appendChild(n);void n.offsetWidth;pb.classList.add('rdy');
       }
     },dur);
   };
-  const note=(t,ms)=>{back();const my=++tok;h.innerHTML='<div class="tx">'+t+'</div>';h.classList.remove('dn');h.hidden=false;if(h.getBoundingClientRect().top<2)h.classList.add('dn');setTimeout(()=>{if(my===tok)shut()},ms)};
+  const note=(t,ms)=>{back();const my=++tok;h.innerHTML='<div class="tx">'+t+'</div>';h.classList.add('up');h.hidden=false;setTimeout(()=>{if(my===tok)shut()},ms)};
   const doInstall=async()=>{
     if(!ev){shut();return}
     const e=ev;ev=null;shut();
@@ -3543,7 +3543,7 @@ setTimeout(amuNudge,12500);
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();ev=e});
   window.addEventListener('appinstalled',()=>{note('✓ <b>Aplicação instalada.</b> Procure o ícone no ecrã inicial.',7000)});
   b.onclick=()=>{
-    if(b.parentNode!==home){if(!b.classList.contains('lock'))doInstall();return}
+    if(b.classList.contains('inpanel')){if(!b.classList.contains('lock'))doInstall();return}
     if(!h.hidden){shut();return}
     if(stand())open('<b>A app já está instalada</b> neste aparelho.','ok');
     else if(ev)open(INTRO,'go');
