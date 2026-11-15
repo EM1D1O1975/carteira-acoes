@@ -796,13 +796,19 @@ body::before,:root.first body::before{display:none!important}
 @media(min-width:561px){.top h1{padding-right:0}}
 
 /* Botão Instalar */
-#pwai{margin-left:auto;display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#ffe58f,#f0b429);color:#3b2a00;font-weight:800;font-size:11px;border:0;border-radius:999px;padding:5px 10px 5px 8px;white-space:nowrap;box-shadow:0 2px 10px rgba(240,180,41,.45),inset 0 1px 0 rgba(255,255,255,.6);cursor:pointer}
+#pwaw{margin-left:auto;position:relative;display:inline-flex}
+#pwai{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#ffe58f,#f0b429);color:#3b2a00;font-weight:800;font-size:11px;border:0;border-radius:999px;padding:5px 10px 5px 8px;white-space:nowrap;box-shadow:0 2px 10px rgba(240,180,41,.45),inset 0 1px 0 rgba(255,255,255,.6);cursor:pointer}
 #pwai[hidden]{display:none}
-#pwah{margin-top:8px;font-size:12.5px;line-height:1.45;background:rgba(0,0,0,.25);color:#fff;border-radius:12px;padding:10px 12px;max-width:340px}
+#pwah{position:absolute;right:0;bottom:calc(100% + 10px);width:min(330px,calc(100vw - 24px));z-index:30;font-size:12.5px;line-height:1.45;background:#1d2a12;color:#fff;border:1px solid rgba(255,229,143,.55);border-radius:12px;padding:10px 12px;box-shadow:0 8px 26px rgba(0,0,0,.45)}
+#pwah.dn{bottom:auto;top:calc(100% + 10px)}
+#pwah.dn::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#1d2a12}
+#pwah::after{content:'';position:absolute;right:26px;top:100%;border:7px solid transparent;border-top-color:#1d2a12}
 #pwah[hidden]{display:none}
 #pwah b{font-weight:800}
 #pwah .pb{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
 #pwah .pb button{font-size:12px;font-weight:800;border:0;border-radius:999px;padding:6px 14px;cursor:pointer;background:rgba(255,255,255,.2);color:#fff}
+#pwah .pb #pwai{font-size:12px;padding:6px 14px 6px 12px;background:linear-gradient(135deg,#ffe58f,#f0b429);color:#3b2a00;animation:pwaMv .35s ease both}
+@keyframes pwaMv{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
 #pwah .pb button.go{background:linear-gradient(135deg,#ffe58f,#f0b429);color:#3b2a00}
 </style></head><body><main>
 <div class="top"><span class="tag">Ferramenta pessoal</span>
@@ -814,7 +820,7 @@ body::before,:root.first body::before{display:none!important}
 <span class="badge" id="exclpill" hidden title="O imposto estimado usa a exclusão parcial do art. 43.º, n.º 5 do CIRS (não confirmada para o FCPE)">exclusão parcial ativa</span><span class="badge" id="snappill" hidden title="Saldo inicial: custos e mais-valias anteriores são aproximados">⚠ saldo inicial</span><span class="badge" id="estpill" hidden title="Há operações estimadas (provisórias) incluídas nos totais">≈ estimativas</span></div>
 <button type="button" id="tinfoS" class="tinfoS gone" aria-label="Mostrar a informação completa"></button><div id="wsw"><div class="seg"><button id="wmain">Os meus registos</button><button id="wsim" title="Folha para experimentar «e se…» sem alterar os registos reais">Simulação (experimentar)</button></div></div>
 <div id="expw" style="margin-top:10px"><button id="expdf" style="background:#fff;color:#4a6e22">Exportar</button> <span id="expmsg" style="font-size:12px"></span></div>
-<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button id="snd" type="button" title="Som de caixa registadora: modestas123123 (Pixabay)" style="background:rgba(255,255,255,.22);color:#fff;padding:6px 12px;font-size:12px">🔊 Som ligado</button><button id="dimb" type="button" style="background:rgba(255,255,255,.22);color:#fff;padding:6px 12px;font-size:12px">🌙 Ambiente escuro</button><button id="pwai" type="button" hidden title="Pôr a Carteira no ecrã inicial, como uma aplicação. Não importa extratos."><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg>Instalar app</button></div><div id="pwah" hidden></div></div>
+<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button id="snd" type="button" title="Som de caixa registadora: modestas123123 (Pixabay)" style="background:rgba(255,255,255,.22);color:#fff;padding:6px 12px;font-size:12px">🔊 Som ligado</button><button id="dimb" type="button" style="background:rgba(255,255,255,.22);color:#fff;padding:6px 12px;font-size:12px">🌙 Ambiente escuro</button><span id="pwaw"><button id="pwai" type="button" hidden title="Pôr a Carteira no ecrã inicial, como uma aplicação. Não importa extratos."><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg>Instalar app</button><div id="pwah" hidden></div></span></div></div>
 <div id="wban"></div>
 
 <div id="cfgcard" class="card cfgrail"><div class="cr-in"><div class="cr-k">Cotação VINCI</div><div class="cr-pxw"><span class="cr-pr"><input id="px" class="cr-px" type="text" inputmode="none" readonly tabindex="-1" aria-readonly="true" aria-label="Cotação atual da VINCI em euros (automática)"><span class="cr-eur">€</span></span><span class="cr-var" id="cvar"></span></div><div id="pxinfo" class="pxi"></div><div class="cr-sep"></div><label class="cr-row">Taxa de imposto (%)<input id="rate" type="number" step="0.5" min="0"></label><label class="cr-row">Colaborador<select id="emp"><option value="1">Sim</option><option value="2">Saí (com compensação)</option><option value="0">Saí (demissão/justa causa)</option></select></label><div class="cr-foot"><a href="https://www.google.com/search?q=acoes+vinci" target="_blank" rel="noopener">ver no Google</a></div></div></div>
@@ -1159,7 +1165,7 @@ function openData(){
   const prN=pr&&pr.data&&Array.isArray(pr.data.ops)?pr.data.ops.length:0,loc=AUTOMIG?readLocal():null,locOk=!!(loc&&hasData(loc));
   const rec=(prN>0||locOk)?'<fieldset><legend>Recuperar</legend>'+(prN>0?'<p class="note">Cópia automática de antes do último reset ('+new Date(pr.at).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'): '+prN+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recpre" class="g">Recuperar dados de antes do reset</button></div>':'')+(locOk?'<p class="note">Cópia guardada neste navegador (antes de usar a conta): '+loc.ops.length+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recloc" class="g">Recuperar a cópia deste navegador</button></div>':'')+'<p class="note" id="recmsg" style="min-height:1.2em"></p></fieldset>':'';
   const nm=LOCALONLY?'<fieldset><legend>O seu nome</legend><div class="exact" style="justify-content:flex-start;flex-wrap:wrap;align-items:center"><input id="whoin" type="text" maxlength="12" placeholder="ex.: Maria" autocomplete="off" style="font-size:15px;padding:8px 10px;min-width:0;flex:1 1 140px"><button type="button" id="whosave" class="g">Guardar nome</button></div><p class="note" style="margin:6px 0 0">Fica só neste aparelho. Serve para lhe dizer, da próxima vez, se está a retomar a sua sessão.</p></fieldset>':'';
-  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-15 22:55 (botão instalar app)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
+  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-15 23:20 (instruções por cima do botão)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
   document.body.appendChild(m);
   m.querySelector('#bkgo').onclick=bkDownload;
   m.querySelector('#bkld').onclick=()=>m.querySelector('#bkfile').click();
@@ -3480,25 +3486,28 @@ setTimeout(amuNudge,12500);
   if(stand())return;
   let ev=null;
   const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  const INTRO='<b>Pôr a Carteira no ecrã inicial</b><br>Fica um ícone como o de qualquer aplicação, e a página abre em ecrã inteiro, também sem internet. <b>Não importa extratos</b> nem descarrega ficheiros: os seus dados continuam guardados só neste aparelho.';
-  const say=(t,btns)=>{h.innerHTML=t+(btns?'<div class="pb">'+btns+'</div>':'');h.hidden=false};
-  const bind=()=>{const g=h.querySelector('.go'),n=h.querySelector('.no');
-    if(n)n.onclick=()=>{h.hidden=true};
-    if(g)g.onclick=async()=>{
-      if(!ev){h.hidden=true;return}
-      ev.prompt();let r=null;try{r=await ev.userChoice}catch(e){}
-      ev=null;
-      if(r&&r.outcome==='accepted'){b.hidden=true;say('✓ <b>Instalação aceite.</b> Procure o ícone no ecrã inicial.');setTimeout(()=>{h.hidden=true},7000)}
-      else{say('Instalação cancelada. Pode instalar mais tarde com o botão “Instalar app”.');setTimeout(()=>{h.hidden=true},5000)}
-    }};
+  const INTRO='<b>Pôr a Carteira no ecrã inicial</b><br>Fica um ícone como o de qualquer app e abre em ecrã inteiro. <b>Não importa extratos</b> nem descarrega ficheiros; os dados ficam só neste aparelho.';
+  const home=b.parentNode;
+  const back=()=>{if(b.parentNode!==home)home.insertBefore(b,h)};
+  const say=(t,btns)=>{back();h.innerHTML=t+(btns?'<div class="pb">'+btns+'</div>':'');h.classList.remove('dn');h.hidden=false;if(h.getBoundingClientRect().top<2)h.classList.add('dn')};
+  const shut=()=>{h.hidden=true;back()};
+  const bind=()=>{const n=h.querySelector('.no');if(n)n.onclick=shut};
+  const doInstall=async()=>{
+    if(!ev){shut();return}
+    const e=ev;ev=null;back();h.hidden=true;
+    e.prompt();let r=null;try{r=await e.userChoice}catch(x){}
+    if(r&&r.outcome==='accepted'){b.hidden=true;say('✓ <b>Instalação aceite.</b> Procure o ícone no ecrã inicial.');setTimeout(()=>{h.hidden=true},7000)}
+    else{ev=e;say('Instalação cancelada. Pode instalar mais tarde com o botão “Instalar app”.');setTimeout(()=>{h.hidden=true},5000)}
+  };
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();ev=e;b.hidden=false});
   window.addEventListener('appinstalled',()=>{b.hidden=true;say('✓ <b>Aplicação instalada.</b> Procure o ícone no ecrã inicial.');setTimeout(()=>{h.hidden=true},7000)});
   if(ios)b.hidden=false;
   b.onclick=()=>{
-    if(!h.hidden){h.hidden=true;return}
-    if(ev)say(INTRO,'<button type="button" class="go">Instalar a app</button><button type="button" class="no">Agora não</button>');
-    else if(ios)say(INTRO+'<br><br>No iPhone ou iPad: toque em <b>Partilhar</b> (o quadrado com a seta) e depois em <b>Adicionar ao ecrã principal</b>.','<button type="button" class="no">Percebi</button>');
-    else say(INTRO+'<br><br>Abra o menu do navegador (⋮) e escolha <b>Instalar aplicação</b> ou <b>Adicionar ao ecrã inicial</b>.','<button type="button" class="no">Percebi</button>');
+    if(b.parentNode!==home){doInstall();return}
+    if(!h.hidden){shut();return}
+    if(ev){say(INTRO,'<button type="button" class="no">Agora não</button>');h.querySelector('.pb').insertBefore(b,h.querySelector('.no'))}
+    else if(ios)say(INTRO+'<br>No iPhone: <b>Partilhar</b> (quadrado com seta) → <b>Adicionar ao ecrã principal</b>.','<button type="button" class="no">Percebi</button>');
+    else say(INTRO+'<br>No menu do navegador (⋮): <b>Instalar aplicação</b> ou <b>Adicionar ao ecrã inicial</b>.','<button type="button" class="no">Percebi</button>');
     bind();
   };
 })();
