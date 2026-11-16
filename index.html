@@ -792,6 +792,10 @@ body::before,:root.first body::before{display:none!important}
 .xclose:focus-visible{outline-color:#ffd0cb}
 /* Esfera do perfil ao dobro */
 .top .whoav{scale:1.6;transform-origin:100% 0;will-change:transform}
+/* Esfera: nome > GUARDAR > nome > CARREGAR; o brilho do nome só no fim de cada ciclo completo (ver motor da esfera) */
+.top .whoav .orb i{text-shadow:0 0 calc(6px + var(--gl,0)*14px) rgba(255,205,70,calc(.75 + var(--gl,0)*.25)),0 1px 2px rgba(0,0,0,.8)}
+.bkhi{animation:bkhi 2.6s ease}
+@keyframes bkhi{0%,70%{box-shadow:0 0 0 3px #f2b832,0 0 18px rgba(242,184,50,.8)}100%{box-shadow:0 0 0 0 transparent}}
 .top h1{padding-right:90px}
 @media(min-width:561px){.top h1{padding-right:0}}
 
@@ -1063,8 +1067,12 @@ function renderWho(){
   const wc=document.getElementById('whochip');if(wc){wc.textContent='';wc.classList.remove('globe');
     const nm=(nome||'').trim().toUpperCase(),ch=Array.from(nm).slice(0,12);
     const md=document.createElement('span');md.className='md';const ft=document.createElement('span');ft.className='ft';ft.textContent=ch.length?ch[0]:'👤';wc.appendChild(md);
-    if(ch.length){const SP='\u00a0',L=ch.length,rep=[];if(2*L+2<=14){const g=Math.floor((14-2*L)/2),g2=14-2*L-g;rep.push(...ch);for(let q=0;q<g;q++)rep.push(SP);rep.push(...ch);for(let q=0;q<g2;q++)rep.push(SP)}else{rep.push(...ch);while(rep.length<Math.max(14,L+2))rep.push(SP)}const tl=document.createElement('span');tl.className='tl';tl.setAttribute('aria-hidden','true');const rg=document.createElement('span');rg.className='orb';
-      rep.forEach((c,k)=>{const e=document.createElement('i');e.textContent=c===' '?'\u00a0':c;e.style.setProperty('--a',(k*360/rep.length)+'deg');rg.appendChild(e)});tl.appendChild(rg);wc.appendChild(tl)}
+    {const tl=document.createElement('span');tl.className='tl';tl.setAttribute('aria-hidden','true');wc.appendChild(tl)}
+    if(ch.length){const SP='\u00a0',L=ch.length,rep=[];if(2*L+2<=14){const g=Math.floor((14-2*L)/2),g2=14-2*L-g;rep.push(...ch);for(let q=0;q<g;q++)rep.push(SP);rep.push(...ch);for(let q=0;q<g2;q++)rep.push(SP)}else{rep.push(...ch);while(rep.length<Math.max(14,L+2))rep.push(SP)}const tl=wc.querySelector('.tl');const rg=document.createElement('span');rg.className='orb';
+      rep.forEach((c,k)=>{const e=document.createElement('i');e.textContent=c===' '?'\u00a0':c;e.style.setProperty('--a',(k*360/rep.length)+'deg');rg.appendChild(e)});tl.appendChild(rg)}
+    {const usado=(()=>{try{return localStorage.getItem('vinci_bkusado')==='1'}catch(e){return false}})(),
+        mostra=!usado&&(has||(SESSAO&&SESSAO.visitasAntes>0));
+      wc.classList.toggle('nosat',!mostra)}
   wc.title=(nome||'Sem nome')+' — Os meus dados';wc.setAttribute('aria-label','Utilizador: '+(nome||'sem nome')+'. Abrir Os meus dados');wc.hidden=false}
 }
 function askNome(){
@@ -1201,7 +1209,7 @@ function openData(){
   const prN=pr&&pr.data&&Array.isArray(pr.data.ops)?pr.data.ops.length:0,loc=AUTOMIG?readLocal():null,locOk=!!(loc&&hasData(loc));
   const rec=(prN>0||locOk)?'<fieldset><legend>Recuperar</legend>'+(prN>0?'<p class="note">Cópia automática de antes do último reset ('+new Date(pr.at).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'): '+prN+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recpre" class="g">Recuperar dados de antes do reset</button></div>':'')+(locOk?'<p class="note">Cópia guardada neste navegador (antes de usar a conta): '+loc.ops.length+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recloc" class="g">Recuperar a cópia deste navegador</button></div>':'')+'<p class="note" id="recmsg" style="min-height:1.2em"></p></fieldset>':'';
   const nm=LOCALONLY?'<fieldset><legend>O seu nome</legend><div class="exact" style="justify-content:flex-start;flex-wrap:wrap;align-items:center"><input id="whoin" type="text" maxlength="12" placeholder="ex.: Maria" autocomplete="off" style="font-size:15px;padding:8px 10px;min-width:0;flex:1 1 140px"><button type="button" id="whosave" class="g">Guardar nome</button></div><p class="note" style="margin:6px 0 0">Fica só neste aparelho. Serve para lhe dizer, da próxima vez, se está a retomar a sua sessão.</p></fieldset>':'';
-  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 20:30 (boas-vindas logo após o botão Instalar app)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
+  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 21:30 (esfera: branco suave, só quando faz sentido)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
   document.body.appendChild(m);
   m.querySelector('#bkgo').onclick=bkDownload;
   m.querySelector('#bkld').onclick=()=>m.querySelector('#bkfile').click();
@@ -3655,7 +3663,7 @@ setTimeout(amuNudge,12500);
 })();
 </script>
 <script>
-(function(){const c=document.getElementById('whochip');if(c)c.addEventListener('click',()=>{try{openData()}catch(e){}})})();
+(function(){const c=document.getElementById('whochip');if(c)c.addEventListener('click',e=>{const sat=!c.classList.contains('nosat');try{openData()}catch(x){}if(sat)setTimeout(()=>{const b=document.getElementById('bkgo');if(b){const f=b.closest('fieldset')||b;try{f.scrollIntoView({block:'center',behavior:'smooth'})}catch(x){}f.classList.add('bkhi');setTimeout(()=>f.classList.remove('bkhi'),2600)}},120)})})();
 
 /* Instalar como aplicação */
 (function(){
@@ -3722,5 +3730,47 @@ setTimeout(amuNudge,12500);
     else open(INTRO+'<br>No menu do navegador (⋮): <b>Instalar aplicação</b> ou <b>Adicionar ao ecrã inicial</b>.','ok');
   };
 })();
+document.addEventListener('click',e=>{const t=e.target&&e.target.closest&&e.target.closest('#bkgo,#bkld');if(!t)return;try{localStorage.setItem('vinci_bkusado','1')}catch(x){};const w=document.getElementById('whochip');if(w)w.classList.add('nosat')},true);
+/* Motor da esfera. Com dados: nome > GUARDAR > nome > CARREGAR. Sem dados (aparelho novo, mas já conhecido): nome > CARREGAR. Entre passos, uma volta extra suave; o texto troca no ponto cego.
+   O brilho só aparece quando o nome regressa depois do último verbo (ciclo completo). Quando não faz sentido (primeira visita, ou já usou a cópia de segurança), fica só a rotação do nome. */
+(function(){
+  const reduz=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;if(reduz)return;
+  const BASE=20,D=1.6,SP=' ',COR='#e6e3d6',SOMB='0 0 3px rgba(255,255,255,.22),0 1px 2px rgba(0,0,0,.85)';
+  let clock=0,last=0,ativo=false,tDec=0,temDados=null,PL=null;
+  const slots=(w,nome)=>{const ch=Array.from(w),rep=[];
+    if(nome){const L=ch.length;if(2*L+2<=14){const g=Math.floor((14-2*L)/2),g2=14-2*L-g;rep.push(...ch);for(let q=0;q<g;q++)rep.push(SP);rep.push(...ch);for(let q=0;q<g2;q++)rep.push(SP)}else{rep.push(...ch);while(rep.length<Math.max(14,L+2))rep.push(SP)}}
+    else{rep.push(...ch);while(rep.length<14)rep.push(SP)}return rep};
+  function nomeAtual(){const p=(typeof perfil==='function')?perfil():null;return ((p&&p.nome)||'').trim().toUpperCase().slice(0,12)}
+  function dados(){try{return ALL.some(o=>(o.ws||'main')==='main')||((CFG.main&&CFG.main.stm)||[]).length>0}catch(e){return false}}
+  function usado(){try{return localStorage.getItem('vinci_bkusado')==='1'}catch(e){return false}}
+  function plano(tem){return tem?{pal:['N','GUARDAR','N','CARREGAR'],rest:[8,4,8,4]}:{pal:['N','CARREGAR'],rest:[8,4]}}
+  function estado(t,P){
+    const n=P.pal.length,T=P.rest.reduce((a,b)=>a+b,0)+n*D,CICLO=BASE*T+n*360,c=Math.floor(t/T),r=t-c*T;let acc=0,th=0,i=0,u=-1,gl=0;
+    for(let k=0;k<n;k++){
+      if(r<acc+P.rest[k]){th+=BASE*(r-acc);i=k;if(k===0&&c>0){const q=r-acc;if(q<1.4)gl=Math.exp(-q*2.2)*.9}break}
+      th+=BASE*P.rest[k];acc+=P.rest[k];
+      if(r<acc+D){u=(r-acc)/D;th+=BASE*(r-acc)+360*(u-Math.sin(2*Math.PI*u)/(2*Math.PI));i=u<.5?k:(k+1)%n;if(k===n-1)gl=Math.sin(Math.PI*u);break}
+      th+=BASE*D+360;acc+=D}
+    return {th:c*CICLO+th,i,gl}}
+  function loop(now){
+    requestAnimationFrame(loop);
+    const wc=document.getElementById('whochip'),orb=wc&&wc.querySelector('.orb'),md=wc&&wc.querySelector('.md');
+    if(!wc||wc.hidden||!orb)return;
+    const dt=Math.min(.1,(now-last)/1000||0);last=now;
+    tDec-=dt;
+    if(tDec<=0){tDec=.5;const d=dados(),pv=((typeof SESSAO!=='undefined'&&SESSAO&&SESSAO.visitasAntes)||0)>0,mostra=!usado()&&(d||pv);wc.classList.toggle('nosat',!mostra);if(d!==temDados){temDados=d;PL=plano(d);clock=0;orb.dataset.sat=''}}
+    if(!PL)return;
+    if(wc.classList.contains('nosat')){if(ativo){ativo=false;orb.style.transform='';orb.style.animation='';orb.style.removeProperty('--gl');if(md)md.style.filter='';orb.dataset.sat='';renderWho()}return}
+    if(!ativo){ativo=true;clock=0;orb.dataset.sat=''}
+    if(!wc.matches(':hover'))clock+=dt;
+    const e=estado(clock,PL);
+    orb.style.animation='none';
+    if(orb.dataset.sat!==String(e.i)){
+      orb.dataset.sat=String(e.i);const nome=nomeAtual();if(!nome)return;
+      const pal=PL.pal[e.i],verbo=pal==='N'?null:pal,rep=slots(verbo||nome,!verbo);
+      orb.textContent='';rep.forEach((c,k)=>{const el=document.createElement('i');el.textContent=c;el.style.setProperty('--a',(k*360/rep.length)+'deg');if(verbo){el.style.color=COR;el.style.textShadow=SOMB}orb.appendChild(el)})}
+    orb.style.transform='rotateY('+e.th+'deg)';orb.style.setProperty('--gl',e.gl.toFixed(3));
+    if(md)md.style.filter=e.gl>.01?'brightness('+(1+.7*e.gl).toFixed(3)+')':''}
+  requestAnimationFrame(loop)})();
 </script>
 </body></html>
