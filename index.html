@@ -1174,7 +1174,7 @@ function openData(){
   const prN=pr&&pr.data&&Array.isArray(pr.data.ops)?pr.data.ops.length:0,loc=AUTOMIG?readLocal():null,locOk=!!(loc&&hasData(loc));
   const rec=(prN>0||locOk)?'<fieldset><legend>Recuperar</legend>'+(prN>0?'<p class="note">Cópia automática de antes do último reset ('+new Date(pr.at).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'): '+prN+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recpre" class="g">Recuperar dados de antes do reset</button></div>':'')+(locOk?'<p class="note">Cópia guardada neste navegador (antes de usar a conta): '+loc.ops.length+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recloc" class="g">Recuperar a cópia deste navegador</button></div>':'')+'<p class="note" id="recmsg" style="min-height:1.2em"></p></fieldset>':'';
   const nm=LOCALONLY?'<fieldset><legend>O seu nome</legend><div class="exact" style="justify-content:flex-start;flex-wrap:wrap;align-items:center"><input id="whoin" type="text" maxlength="12" placeholder="ex.: Maria" autocomplete="off" style="font-size:15px;padding:8px 10px;min-width:0;flex:1 1 140px"><button type="button" id="whosave" class="g">Guardar nome</button></div><p class="note" style="margin:6px 0 0">Fica só neste aparelho. Serve para lhe dizer, da próxima vez, se está a retomar a sua sessão.</p></fieldset>':'';
-  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 10:30 (avisos agrupados)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
+  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 11:15 (resolver automaticamente)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
   document.body.appendChild(m);
   m.querySelector('#bkgo').onclick=bkDownload;
   m.querySelector('#bkld').onclick=()=>m.querySelector('#bkfile').click();
@@ -1320,8 +1320,13 @@ function renderSums(){
 }
 const nSub=q=>{const r=Math.round(q);return Math.abs(q-r)/q<0.012?r:Math.floor(q)};
 let FIXING=false;
+function stmConfirms(dt){
+  const sd=ops.filter(o=>o.t==='S').map(o=>o.d).sort()[0]||'';
+  const L=(cfg.stm||[]).filter(s=>s.qty!=null&&s.dt>=dt&&!(sd&&s.dt<sd)).sort((a,b)=>a.dt.localeCompare(b.dt));
+  return L.length&&Math.abs(L[0].qty-qtyAt(ops,L[0].dt))<0.05?L[0].dt:null;
+}
 function bonusReview(){
-  const dups=[],mism=[],W=7*864e5;
+  const dups=[],mism=[],okb=[],W=7*864e5;
   ops.filter(o=>o.t==='C').forEach(c=>{
     const vd=c.disp||add3(c.d),E=bonusFor(c.sh||nSub(c.q));
     const bs=ops.filter(b=>b.t==='B'&&Math.abs(new Date(b.d)-new Date(vd))<=W).sort((a,b)=>a.d.localeCompare(b.d));
@@ -1329,13 +1334,17 @@ function bonusReview(){
       const kept=[];
       bs.forEach(b=>{const f=kept.find(k=>Math.abs(k.q-b.q)/k.q<0.01);if(f)dups.push({keep:f,extra:b,c});else kept.push(b)});
       const S=kept.reduce((a,b)=>a+b.q,0);
-      if(S<E-0.5||S>E*1.03)mism.push({c,E,S,b:kept.length===1?kept[0]:null});
+      if(S<E-0.5||S>E*1.03){
+        const st=stmConfirms(vd);          // o saldo do extrato seguinte fecha: o valor registado é o real e o escalão é só uma previsão
+        if(st&&kept.every(b=>b.src==='extrato'))okb.push({c,E,S,st});
+        else mism.push({c,E,S,b:kept.length===1?kept[0]:null});
+      }
     }else{
       const r=ops.find(x=>x.t==='R'&&x.disp===vd);
       if(r&&Math.abs(r.q-E)>0.5)mism.push({c,E,S:r.q,b:r});
     }
   });
-  return{dups,mism};
+  return{dups,mism,okb};
 }
 function fixPlan(){
   const br=bonusReview(),acts=[];
@@ -1460,11 +1469,13 @@ function firstDiff(){
 }
 function estMissingAll(){
   const raw=(MISSDIV||[]).map(i=>({i,e:estDividend(i.y,i.s)})).filter(x=>x.e);
-  const fd=firstDiff(),S=raw.reduce((a,x)=>a+x.e.q,0);
+  const fd=firstDiff();
+  // só os dividendos anteriores ao extrato que acusa a diferença podem explicá-la
+  const pre=fd?raw.filter(x=>x.e.d<=fd.dt):[],S=pre.reduce((a,x)=>a+x.e.q,0);
   if(fd&&S>0){
     const k=fd.q/S;
-    raw.forEach(x=>{x.e.raw=x.e.q;x.e.q=rd4(x.e.q*k);x.e.qmin=rd4(x.e.qmin*k);x.e.qmax=rd4(x.e.qmax*k);x.e.cal=fd;x.e.conf=(k>=0.6&&k<=1.4)?x.e.conf:'baixa'});
-    const dif=rd4(fd.q-raw.reduce((a,x)=>a+x.e.q,0));if(raw.length)raw[raw.length-1].e.q=rd4(raw[raw.length-1].e.q+dif);
+    pre.forEach(x=>{x.e.raw=x.e.q;x.e.q=rd4(x.e.q*k);x.e.qmin=rd4(x.e.qmin*k);x.e.qmax=rd4(x.e.qmax*k);x.e.cal=fd;x.e.conf=(k>=0.6&&k<=1.4)?x.e.conf:'baixa'});
+    const dif=rd4(fd.q-pre.reduce((a,x)=>a+x.e.q,0));if(pre.length)pre[pre.length-1].e.q=rd4(pre[pre.length-1].e.q+dif);
   }
   return raw;
 }
@@ -2038,6 +2049,7 @@ function renderChecks(){
    md.forEach(d=>{al.push('Bonificação duplicada da subscrição de '+D(d.c.d)+': '+D(d.extra.d)+' repete '+D(d.keep.d)+' (ver abaixo).');rows.push('<tr><td>'+D(d.c.d)+' ('+N(d.c.q)+')</td><td>'+N(bonusFor(nSub(d.c.q)))+'</td><td>'+N(d.keep.q+d.extra.q)+'</td><td style="white-space:normal;text-align:left">Duplicada em '+D(d.extra.d)+'</td><td><button data-chk="bdel" data-id="'+d.extra.id+'">Remover duplicado</button></td></tr>')});
    br.mism.forEach(m=>{al.push('Bonificação da subscrição de '+D(m.c.d)+': '+N(m.S)+' ações registadas, '+N(m.E)+' previstas (ver abaixo).');rows.push('<tr><td>'+D(m.c.d)+' ('+N(m.c.q)+')</td><td>'+N(m.E)+'</td><td>'+(m.b?'<input id="bq_'+m.b.id+'" type="number" step="any" value="'+m.b.q+'" style="width:100px">':N(m.S))+'</td><td style="white-space:normal;text-align:left">Não coincide com a prevista pelo escalão</td><td>'+(m.b?'<button data-chk="bset" data-id="'+m.b.id+'">Guardar quantidade</button>':'')+'</td></tr>')});
    if(rows.length)hb+='<p><b>Bonificações a rever ('+rows.length+')</b></p>'+table(['Subscrição (qtd.)','Prevista','Registada','Situação',''],rows);
+   if(br.okb.length)hb+='<p class="note"><b>Confirmadas pelo extrato:</b><br>'+br.okb.map(x=>'Bonificação da subscrição de '+D(x.c.d)+': o extrato regista '+N(x.S)+' (o escalão previa '+N(x.E)+'); o saldo de '+D(x.st)+' fecha, por isso o valor está certo.').join('<br>')+'</p>';
    if((cfg.fx||[]).length)hb+='<p class="note"><b>Correções automáticas recentes:</b><br>'+cfg.fx.slice().reverse().join('<br>')+'</p>';
   }
   // Diferença repetida em vários extratos = um só problema: junta num único aviso
@@ -2053,7 +2065,10 @@ function renderChecks(){
   {const ak=cfg.ack||[];for(let i=al.length-1;i>=0;i--)if(ak.includes(al[i]))al.splice(i,1)}
   const he=estBlock();
   {const ne=ops.filter(o=>o.src==='estimada').length,ep=document.getElementById('estpill');if(ep){ep.hidden=!ne;ep.textContent='≈ '+ne+(ne===1?' operação estimada':' operações estimadas')}}
-  $('chk').innerHTML=(al.length?'<p><b>Alertas ('+al.length+')</b></p><ul style="margin:6px 0 12px 18px;padding:0;font-size:13px">'+al.map(a=>'<li style="margin:6px 0">'+a+guideHTML(a,al.length<=2)+'</li>').join('')+'</ul>':'<p class="pos"><b>Sem alertas.</b></p>')+hq+he+hs+hb+h;
+  const auto=(()=>{const a=(MISSDIV&&MISSDIV.length&&al.some(x=>/^Possível dividendo capitalizado em falta/.test(x)))?estMissingAll():[];if(!a.length)return '';
+    const ca=a.filter(x=>x.e.cal),cal=ca.length>0&&ca.length===a.length,tot=a.reduce((t,x)=>t+x.e.q,0);
+    return '<div class="gdest" style="margin:6px 0 10px"><b>Resolver automaticamente</b><br>'+(cal?'A plataforma usou os saldos dos seus extratos para calcular os '+a.length+(a.length===1?' dividendo em falta':' dividendos em falta')+' (total ≈ '+N(tot)+' unid., o que fecha a diferença do extrato). Só a divisão entre as datas é estimada.':'A plataforma calculou os '+a.length+(a.length===1?' dividendo em falta':' dividendos em falta')+' pela média de outros anos (≈ '+N(tot)+' unid.). É uma estimativa.')+' Ficam assinalados como «estimados» e saem quando importar o extrato real. Pode anular.<br><button class="g" data-chk="estdall" style="margin-top:6px">Resolver automaticamente ('+a.length+')</button></div>'})();
+  $('chk').innerHTML=(al.length?'<p><b>Alertas ('+al.length+')</b></p>'+auto+'<ul style="margin:6px 0 12px 18px;padding:0;font-size:13px">'+al.map(a=>'<li style="margin:6px 0">'+a+guideHTML(a,al.length<=2)+'</li>').join('')+'</ul>':'<p class="pos"><b>Sem alertas.</b></p>')+hq+he+hs+hb+h;
   ALERTS=al.length;
   PENDN=al.filter(a=>!/^Anos sem extrato/.test(a)).length+(cfg.chk||[]).length+((()=>{const s0=snapNow();return s0&&snapInfo(s0).missing.length?1:0})());
   const e=document.getElementById('sm_chk');if(e)e.textContent=(al.length?al.length+(al.length===1?' alerta':' alertas'):'Sem alertas')+' · '+stm.length+(stm.length===1?' extrato':' extratos')+' carregados';
