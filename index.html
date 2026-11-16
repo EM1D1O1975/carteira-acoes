@@ -1174,7 +1174,7 @@ function openData(){
   const prN=pr&&pr.data&&Array.isArray(pr.data.ops)?pr.data.ops.length:0,loc=AUTOMIG?readLocal():null,locOk=!!(loc&&hasData(loc));
   const rec=(prN>0||locOk)?'<fieldset><legend>Recuperar</legend>'+(prN>0?'<p class="note">Cópia automática de antes do último reset ('+new Date(pr.at).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'): '+prN+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recpre" class="g">Recuperar dados de antes do reset</button></div>':'')+(locOk?'<p class="note">Cópia guardada neste navegador (antes de usar a conta): '+loc.ops.length+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recloc" class="g">Recuperar a cópia deste navegador</button></div>':'')+'<p class="note" id="recmsg" style="min-height:1.2em"></p></fieldset>':'';
   const nm=LOCALONLY?'<fieldset><legend>O seu nome</legend><div class="exact" style="justify-content:flex-start;flex-wrap:wrap;align-items:center"><input id="whoin" type="text" maxlength="12" placeholder="ex.: Maria" autocomplete="off" style="font-size:15px;padding:8px 10px;min-width:0;flex:1 1 140px"><button type="button" id="whosave" class="g">Guardar nome</button></div><p class="note" style="margin:6px 0 0">Fica só neste aparelho. Serve para lhe dizer, da próxima vez, se está a retomar a sua sessão.</p></fieldset>':'';
-  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 11:50 (dividendos confirmados pelo extrato)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
+  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 12:35 (explicação da diferença com a Amundi)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
   document.body.appendChild(m);
   m.querySelector('#bkgo').onclick=bkDownload;
   m.querySelector('#bkld').onclick=()=>m.querySelector('#bkfile').click();
@@ -1637,6 +1637,20 @@ function renderDiv(){
   const e1=document.getElementById('sm_div'),last=L[L.length-1];if(e1)e1.textContent=last.y+': '+E(last.decl)+' · '+N(last.up)+' UP'+(L.length>1?' · '+L.length+' anos':'');
 }
 const pn2=s=>{s=String(s==null?'':s).trim().replace(/\s/g,'');if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');const v=parseFloat(s);return isFinite(v)?v:0};
+function explainDiff(d){
+  const tol=0.00051,t=Math.abs(d),isOp=o=>o.t!=='V'&&o.t!=='R';
+  const pool=d>0?ops.filter(o=>isOp(o)&&lockOf(o)>TODAY):ops.filter(o=>isOp(o)&&lockOf(o)&&lockOf(o)<=TODAY&&lockOf(o)>=addDays(TODAY,-400));
+  const n=pool.length,hit=[];
+  for(let i=0;i<n&&hit.length<4;i++){
+    if(Math.abs(pool[i].q-t)<tol)hit.push([pool[i]]);
+    for(let j=i+1;j<n;j++){
+      if(Math.abs(pool[i].q+pool[j].q-t)<tol)hit.push([pool[i],pool[j]]);
+      for(let k=j+1;k<n;k++)if(Math.abs(pool[i].q+pool[j].q+pool[k].q-t)<tol)hit.push([pool[i],pool[j],pool[k]]);
+    }
+  }
+  return{hit,pool};
+}
+const OPNAME={C:'Subscrição',B:'Bonificação',D:'Dividendo capitalizado',S:'Saldo inicial'};
 function renderAmu(){
   const el=document.getElementById('amuc');if(!el)return;
   const a=cfg.amu||{},c=calc(),P=pos(c),px=+cfg.px||0,uq=+a.uq||0,ue=+a.ue||0,ap=+a.px||0,lq=+a.lq||0;
@@ -1644,19 +1658,33 @@ function renderAmu(){
   const inp=(id,lab,val,ph)=>'<label>'+lab+'<input id="'+id+'" type="text" inputmode="decimal" value="'+f(val)+'" placeholder="'+ph+'"></label>';
   let h='<p class="note">Copie para aqui os valores que vê na sua área pessoal da Amundi. A plataforma compara-os com o que calculou a partir dos extratos.</p><div class="row">'+inp('amuq','Unidades disponíveis',a.uq,'ex.: 189,6140')+inp('amue','Valor disponível (€)',a.ue,'ex.: 19 746,40')+inp('amup','Valor da unidade (€)',a.px,'ex.: 104,14')+'<label>Data desse valor<input id="amud" type="date" value="'+(a.pdt||'')+'"></label>'+inp('amul','Unidades indisponíveis (opcional)',a.lq,'cativas')+'</div>';
   const rows=[];let nd=0;
-  const row=(lab,pl,am,fmt,tol)=>{const d=am-pl,ok=Math.abs(d)<=tol;if(!ok)nd++;rows.push('<tr><td>'+lab+'</td><td>'+fmt(pl)+'</td><td>'+fmt(am)+'</td><td class="'+(ok?'pos':'neg')+'">'+(ok?'confere':fmt(d))+'</td></tr>')};
+  const row=(lab,pl,am,fmt,tol,info)=>{const d=am-pl,ok=Math.abs(d)<=tol;if(!ok&&!info)nd++;rows.push('<tr><td>'+lab+'</td><td>'+fmt(pl)+'</td><td>'+fmt(am)+'</td><td class="'+(ok?'pos':info?'':'neg')+'">'+(ok?'confere':fmt(d)+(info?' <small>(informativo)</small>':''))+'</td></tr>')};
   let msg='';
   if(uq>0){
     const unit=ap>0?ap:(ue>0?ue/uq:0);
     row('Unidades disponíveis',P.avail,uq,N,0.0005);
     if(ue>0&&unit>0)row('Valor disponível (€)',P.avail*unit,ue,E,0.5);
-    if(ap>0&&px>0)row('Valor da unidade (€) vs cotação da página',px,ap,E,Math.max(0.01,ap*0.001));
+    if(ap>0&&px>0)row('Valor da unidade (€) vs cotação da página',px,ap,E,Math.max(0.01,ap*0.001),true);
     if(lq>0){row('Unidades indisponíveis (cativas)',P.Lq,lq,N,0.0005);row('Total de unidades',P.avail+P.Lq,uq+lq,N,0.0005)}
     const d=uq-P.avail,stm=(cfg.stm||[]).slice().sort((x,y)=>x.dt.localeCompare(y.dt)).pop(),gap=stm&&stm.qty>0?stm.qty-qtyAt(ops,stm.dt):null;
     if(Math.abs(d)<=0.0005)msg='<p class="pos"><b>As unidades disponíveis conferem com a Amundi.</b> Isto valida as datas de disponibilidade e a regra dos 3 anos.</p>';
     else if(gap!=null&&Math.abs(d-gap)<0.002)msg='<p class="warn"><b>A diferença ('+N(d)+' unidades) é a mesma do extrato de '+D(stm.dt)+' ('+N(gap)+').</b> É um só problema: faltam à página unidades que a Amundi já conta como disponíveis (em regra dividendos ou arredondamentos de 2017 a 2023). Importe os extratos desses anos ou use «Ajustar provisoriamente» em Verificações.</p>';
     else msg='<p class="warn"><b>A página tem '+N(Math.abs(d))+(d>0?' unidades a menos':' unidades a mais')+' do que a Amundi nas disponíveis.</b> Veja em Verificações se há extratos ou operações em falta; se o desvio for de operações posteriores ao último extrato'+(stm?' ('+D(stm.dt)+')':'')+', registe-as em «Nova operação».</p>';
+    if(ap>0&&px>0&&Math.abs(px-ap)>Math.max(0.01,ap*0.001))msg+='<p class="note">O valor da unidade da Amundi'+(a.pdt?' ('+D(a.pdt)+')':'')+' é o do fundo, calculado por eles; a cotação da página é a da bolsa. Não são iguais, por isso esta linha é só informativa e não conta como diferença.</p>';
     if(ap>0&&ue>0&&Math.abs(uq*ap-ue)>0.05)msg+='<p class="note">Atenção: '+N(uq)+' × '+E(ap)+' = '+E(uq*ap)+', e não '+E(ue)+'. Confirme os valores copiados.</p>';
+    if(Math.abs(d)>0.0005&&!(gap!=null&&Math.abs(d-gap)<0.002)){
+      const ex=explainDiff(d),dir=d>0;
+      if(ex.hit.length){
+        msg+='<div class="gdest" style="margin:8px 0"><b>Possível explicação</b><br>'+(dir?'A diferença coincide, ao milésimo, com unidades que a plataforma ainda dá como <b>bloqueadas</b> mas que a Amundi já conta como disponíveis:':'A diferença coincide, ao milésimo, com unidades que a plataforma já dá como disponíveis mas que a Amundi ainda tem <b>bloqueadas</b>:')
+          +'<ul class="gdl">'+ex.hit.slice(0,3).map(g=>'<li>'+g.map(o=>(OPNAME[o.t]||'Operação')+' de '+D(o.d)+' ('+N(o.q)+' unid., disponível a '+D(lockOf(o))+')').join(' + ')+(g.length>1?' = '+N(g.reduce((a,o)=>a+o.q,0)):'')+'</li>').join('')+'</ul>'
+          +'<span class="note">Confirme no extrato dessa data a «data de disponibilidade» (à direita da linha) e na Amundi, em «Repartição das suas participações até à data de vencimento». Se a data da Amundi for outra, corrija-a em «As suas operações».</span>'
+          +(dir&&ex.hit[0].length===1?'<br><button class="g" data-amu="unlock" data-id="'+ex.hit[0][0].id+'" style="margin-top:6px">Marcar como disponível a '+D(a.pdt||TODAY)+'</button>':'')+'</div>';
+      }else{
+        const near=ex.pool.slice().sort((x,y)=>lockOf(x).localeCompare(lockOf(y))).slice(0,dir?6:0);
+        msg+='<div class="gdest" style="margin:8px 0"><b>Não encontrei uma explicação exata.</b> A diferença não coincide com nenhuma operação isolada, nem com somas de até 3.'+(dir&&stm?' Como o último extrato ('+D(stm.dt)+') fecha, o mais provável é um movimento posterior a essa data ou uma data de disponibilidade diferente da da Amundi.':'')
+          +(near.length?'<br><span class="note">Próximas tranches a ficarem disponíveis, segundo a plataforma: '+near.map(o=>D(lockOf(o))+' ('+N(o.q)+')').join('; ')+'. Compare com «Repartição das suas participações até à data de vencimento» na Amundi: a tranche que não coincide é a origem.</span>':'')+'</div>';
+      }
+    }
     h+=table(['','Plataforma (extratos)','Amundi','Diferença'],rows)+msg;
     if(false)h+='<p><button type="button" data-amu="px">Usar '+E(ap)+' como cotação da página</button> <span class="note">A Amundi usa o valor da unidade do fundo'+(a.pdt?' de '+D(a.pdt):'')+'; a cotação de mercado pode diferir.</span></p>';
   }else h+='<p class="note">Preencha pelo menos as unidades disponíveis para ver a comparação.</p>';
@@ -1674,6 +1702,7 @@ function renderAmu(){
   ac.addEventListener('click',async e=>{
     const b=e.target.closest&&e.target.closest('button[data-amu]');if(!b)return;
     if(b.dataset.amu==='clr'){cfg.amu=null;await saveCfg();renderAmu();return}
+    if(b.dataset.amu==='unlock'){const dt=(cfg.amu&&cfg.amu.pdt)||TODAY;await updateOp(b.dataset.id,{disp:dt});return}
     if(b.dataset.amu==='px'&&cfg.amu&&cfg.amu.px>0){pushUndo();cfg.px=cfg.amu.px;cfg.px2=cfg.amu.px;cfg.pxManual=true;cfg.pxAt=cfg.amu.pdt?new Date(cfg.amu.pdt+'T17:35:00').getTime():Date.now();await saveCfg();render()}
   });
 }}
