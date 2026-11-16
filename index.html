@@ -1174,7 +1174,7 @@ function openData(){
   const prN=pr&&pr.data&&Array.isArray(pr.data.ops)?pr.data.ops.length:0,loc=AUTOMIG?readLocal():null,locOk=!!(loc&&hasData(loc));
   const rec=(prN>0||locOk)?'<fieldset><legend>Recuperar</legend>'+(prN>0?'<p class="note">Cópia automática de antes do último reset ('+new Date(pr.at).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'): '+prN+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recpre" class="g">Recuperar dados de antes do reset</button></div>':'')+(locOk?'<p class="note">Cópia guardada neste navegador (antes de usar a conta): '+loc.ops.length+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recloc" class="g">Recuperar a cópia deste navegador</button></div>':'')+'<p class="note" id="recmsg" style="min-height:1.2em"></p></fieldset>':'';
   const nm=LOCALONLY?'<fieldset><legend>O seu nome</legend><div class="exact" style="justify-content:flex-start;flex-wrap:wrap;align-items:center"><input id="whoin" type="text" maxlength="12" placeholder="ex.: Maria" autocomplete="off" style="font-size:15px;padding:8px 10px;min-width:0;flex:1 1 140px"><button type="button" id="whosave" class="g">Guardar nome</button></div><p class="note" style="margin:6px 0 0">Fica só neste aparelho. Serve para lhe dizer, da próxima vez, se está a retomar a sua sessão.</p></fieldset>':'';
-  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 13:20 (limpar importações também limpa os saldos dos extratos)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
+  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 13:50 (saldos órfãos, reset e anular sempre visíveis)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
   document.body.appendChild(m);
   m.querySelector('#bkgo').onclick=bkDownload;
   m.querySelector('#bkld').onclick=()=>m.querySelector('#bkfile').click();
@@ -2017,6 +2017,10 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')ihClose()});
 function renderChecks(){
   const c=calc(),al=[],stm=(cfg.stm||[]).slice().sort((a,b)=>a.dt.localeCompare(b.dt)),cy=+TODAY.slice(0,4);
   let h='';
+  if(!ops.length&&stm.length){   // só há saldos de extratos, sem operações: um aviso único em vez de um por extrato
+    $('chk').innerHTML='<p class="warn"><b>Tem '+stm.length+(stm.length===1?' extrato carregado':' extratos carregados')+' mas nenhuma operação.</b></p><p class="note">Provavelmente as operações foram apagadas. Importe de novo os PDF do extrato (os saldos são reconhecidos e não duplicam), ou apague estes saldos para recomeçar.</p><p><button class="g" id="stmclr">Apagar os saldos dos extratos</button></p>';
+    ALERTS=1;const e0=document.getElementById('sm_chk');if(e0)e0.textContent='Sem operações · '+stm.length+(stm.length===1?' extrato':' extratos')+' carregados';
+    return}
   const own=ops.filter(o=>o.t!=='V'&&o.t!=='R'&&o.t!=='S'),sd=ops.filter(o=>o.t==='S').map(o=>o.d).sort()[0]||'';
   {const q0=cfg.chk||[];if(q0.length){const keep=q0.filter(k=>!ops.some(o=>o.t===k.t&&Math.abs(new Date(o.d)-new Date(k.d))<=3*864e5&&Math.abs(o.q-k.q)/Math.max(o.q,k.q)<0.02));if(keep.length!==q0.length){cfg.chk=keep;saveCfg()}}}
   // anos sem extrato
@@ -2820,11 +2824,19 @@ $('xprev').onclick=async e=>{
   $('xprev').innerHTML='<p class="pos"><b>'+(n-sp.ok.filter(x=>x.t==='R').length)+' operações adicionadas'+(sp.ok.some(x=>x.t==='R')?' e '+sp.ok.filter(x=>x.t==='R').length+' direitos pendentes (não são operações)':'')+'.</b>'+(dupN>0?' '+dupN+' já existiam e foram ignoradas.':'')+(nd.length?' <span class="warn">'+nd.length+' ficaram por verificar (tópico Verificações).</span>':'')+' Pode importar mais ficheiros: serão acrescentados sem duplicar.</p>';XP=null;render();
   {const n=ALERTS||0;$('xprev').innerHTML+=n?'<p class="warn"><b>'+n+(n===1?' ponto precisa':' pontos precisam')+' de resolução manual: veja o tópico Verificações.</b></p>':'<p class="pos"><b>Tudo foi interpretado automaticamente: nada a verificar.</b></p>';if(n){try{const dt=$('sm_chk').closest('details');if(dt)dt.open=true}catch(e){}}}
 };
+async function clearStm(){
+  const n=(cfg.stm||[]).length;if(!n)return;
+  if(!(await ask('Apagar os saldos de '+n+' extratos? Pode anular logo a seguir.')))return;
+  pushUndo();UBATCH++;try{cfg.stm=[];await saveCfg();render()}finally{UBATCH--}
+  $('xmsg').textContent=n+' saldos de extrato apagados.';
+}
+$('chk').addEventListener('click',e=>{if(e.target&&e.target.id==='stmclr')clearStm()});
 $('xclear').onclick=async()=>{
   const tag=ops.filter(o=>o.src==='extrato');
   const m=(XP?XP.items:[]).concat($('xtxt').value?parseExtrato($('xtxt').value).items:[]);
   const legacy=ops.filter(o=>!o.src&&m.some(x=>x.t===o.t&&x.d===o.d&&Math.abs(x.q-o.q)<1e-6&&Math.abs(x.p-o.p)<1e-6));
   const del=tag.concat(legacy);
+  if(!del.length&&(cfg.stm||[]).length&&!ops.length){await clearStm();return}
   if(!del.length){
     if(WS==='sim'&&ops.length){await resetWS('sim');return}   // o Reset pede a sua própria confirmação
     $('xmsg').textContent=ops.length?'Não há importações de extrato para limpar (os restantes registos são manuais). Para apagar tudo, use o Reset.':'Não há importações do extrato para limpar.';return}
@@ -3224,7 +3236,7 @@ function spotlight(){
 }
 function updDock(){
   const d=document.getElementById('dock');if(!d)return;
-  const n=(typeof ops!=='undefined'&&ops)?ops.length:0,hasU=(UND[WS]||[]).length>0,was=d.hidden;
+  const n=((typeof ops!=='undefined'&&ops)?ops.length:0)+((typeof cfg!=='undefined'&&cfg&&cfg.stm)?cfg.stm.length:0),hasU=(UND[WS]||[]).length>0,was=d.hidden;
   d.hidden=!(n>0||hasU);
   const u=document.getElementById('undob'),r=document.getElementById('rstb');
   if(u)u.disabled=!hasU;
