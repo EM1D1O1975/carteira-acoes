@@ -1174,7 +1174,7 @@ function openData(){
   const prN=pr&&pr.data&&Array.isArray(pr.data.ops)?pr.data.ops.length:0,loc=AUTOMIG?readLocal():null,locOk=!!(loc&&hasData(loc));
   const rec=(prN>0||locOk)?'<fieldset><legend>Recuperar</legend>'+(prN>0?'<p class="note">Cópia automática de antes do último reset ('+new Date(pr.at).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'): '+prN+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recpre" class="g">Recuperar dados de antes do reset</button></div>':'')+(locOk?'<p class="note">Cópia guardada neste navegador (antes de usar a conta): '+loc.ops.length+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recloc" class="g">Recuperar a cópia deste navegador</button></div>':'')+'<p class="note" id="recmsg" style="min-height:1.2em"></p></fieldset>':'';
   const nm=LOCALONLY?'<fieldset><legend>O seu nome</legend><div class="exact" style="justify-content:flex-start;flex-wrap:wrap;align-items:center"><input id="whoin" type="text" maxlength="12" placeholder="ex.: Maria" autocomplete="off" style="font-size:15px;padding:8px 10px;min-width:0;flex:1 1 140px"><button type="button" id="whosave" class="g">Guardar nome</button></div><p class="note" style="margin:6px 0 0">Fica só neste aparelho. Serve para lhe dizer, da próxima vez, se está a retomar a sua sessão.</p></fieldset>':'';
-  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 11:15 (resolver automaticamente)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
+  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 11:50 (dividendos confirmados pelo extrato)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
   document.body.appendChild(m);
   m.querySelector('#bkgo').onclick=bkDownload;
   m.querySelector('#bkld').onclick=()=>m.querySelector('#bkfile').click();
@@ -1322,7 +1322,7 @@ const nSub=q=>{const r=Math.round(q);return Math.abs(q-r)/q<0.012?r:Math.floor(q
 let FIXING=false;
 function stmConfirms(dt){
   const sd=ops.filter(o=>o.t==='S').map(o=>o.d).sort()[0]||'';
-  const L=(cfg.stm||[]).filter(s=>s.qty!=null&&s.dt>=dt&&!(sd&&s.dt<sd)).sort((a,b)=>a.dt.localeCompare(b.dt));
+  const L=(cfg.stm||[]).filter(s=>s.qty!=null&&s.dt>=dt&&!(sd&&s.dt<=sd)).sort((a,b)=>a.dt.localeCompare(b.dt));
   return L.length&&Math.abs(L[0].qty-qtyAt(ops,L[0].dt))<0.05?L[0].dt:null;
 }
 function bonusReview(){
@@ -2009,12 +2009,17 @@ function renderChecks(){
   const plausSw=k=>k.p>0&&k.p<5000&&k.q>20&&k.q<400;
   const hq=kq.length?'<p><b>Por verificar ('+kq.length+')</b> <span class="note">— não estão carregadas. Corrija a quantidade ou o preço e carregue: os cálculos atualizam logo.</span></p>'+table(['Tipo','Data','Quantidade','Preço (€)','Motivo',''],kq.map(k=>'<tr><td>'+chip(k.t)+'</td><td>'+D(k.d)+'</td><td><input id="cq_'+k.id+'" type="number" step="any" value="'+k.q+'" style="width:110px"></td><td><input id="cp_'+k.id+'" type="number" step="any" value="'+k.p+'" style="width:100px"></td><td style="white-space:normal;text-align:left;min-width:200px">'+k.note+(plausSw(k)?'<br><b>Sugestão:</b> '+N(k.p)+' unid. × '+E(k.q):'')+'</td><td>'+(plausSw(k)?'<button data-chk="sgo" data-id="'+k.id+'">Aplicar sugestão</button> ':'')+'<button class="g" data-chk="go" data-id="'+k.id+'">Carregar</button> <button class="g" data-chk="swap" data-id="'+k.id+'">Trocar qtd ↔ preço</button> <button class="g" data-chk="del" data-id="'+k.id+'">Descartar</button></td></tr>')):'';
   // dividendos semestrais
+  let divNote='';
   const first=own.concat(ops.filter(o=>o.t==='S')).map(o=>o.d).sort()[0];
   if(first){
-    const dv=ops.filter(o=>o.t==='D'),miss=[];
+    const dv=ops.filter(o=>o.t==='D'),miss=[],divOk=[];
     for(let y=+first.slice(0,4);y<=cy;y++)[[3,6,'abril',y+'-04-01',y+'-07-01'],[9,12,'outubro',y+'-10-01',y+'-12-01']].forEach(([lo,hi,nm,st,en])=>{
-      if(first<st&&TODAY>=en&&!dv.some(o=>+o.d.slice(0,4)===y&&+o.d.slice(5,7)>=lo&&+o.d.slice(5,7)<=hi))miss.push(nm+' de '+y);
+      if(first<st&&TODAY>=en&&!dv.some(o=>+o.d.slice(0,4)===y&&+o.d.slice(5,7)>=lo&&+o.d.slice(5,7)<=hi)){
+        const sc=stmConfirms(en);                 // o saldo do extrato seguinte fecha sem este dividendo: não há nada em falta
+        if(sc)divOk.push({t:nm+' de '+y,sc});else miss.push(nm+' de '+y);
+      }
     });
+    if(divOk.length)divNote='<p class="note"><b>Confirmado pelo extrato:</b> '+divOk.map(x=>x.t).join(', ')+' sem dividendo capitalizado registado. O saldo de '+[...new Set(divOk.map(x=>D(x.sc)))].join(' e ')+' fecha sem '+(divOk.length>1?'eles':'ele')+', por isso não falta nada.</p>';
     MISSDIV=miss.map(x=>{const q=x.match(/^(\S+) de (\d{4})$/);return q?{mes:q[1],y:+q[2],s:q[1]==='abril'?'abr':'out'}:null}).filter(Boolean);
     if(miss.length)al.push('Possível dividendo capitalizado em falta: '+miss.join(', ')+'.');
   }else MISSDIV=[];
@@ -2068,7 +2073,7 @@ function renderChecks(){
   const auto=(()=>{const a=(MISSDIV&&MISSDIV.length&&al.some(x=>/^Possível dividendo capitalizado em falta/.test(x)))?estMissingAll():[];if(!a.length)return '';
     const ca=a.filter(x=>x.e.cal),cal=ca.length>0&&ca.length===a.length,tot=a.reduce((t,x)=>t+x.e.q,0);
     return '<div class="gdest" style="margin:6px 0 10px"><b>Resolver automaticamente</b><br>'+(cal?'A plataforma usou os saldos dos seus extratos para calcular os '+a.length+(a.length===1?' dividendo em falta':' dividendos em falta')+' (total ≈ '+N(tot)+' unid., o que fecha a diferença do extrato). Só a divisão entre as datas é estimada.':'A plataforma calculou os '+a.length+(a.length===1?' dividendo em falta':' dividendos em falta')+' pela média de outros anos (≈ '+N(tot)+' unid.). É uma estimativa.')+' Ficam assinalados como «estimados» e saem quando importar o extrato real. Pode anular.<br><button class="g" data-chk="estdall" style="margin-top:6px">Resolver automaticamente ('+a.length+')</button></div>'})();
-  $('chk').innerHTML=(al.length?'<p><b>Alertas ('+al.length+')</b></p>'+auto+'<ul style="margin:6px 0 12px 18px;padding:0;font-size:13px">'+al.map(a=>'<li style="margin:6px 0">'+a+guideHTML(a,al.length<=2)+'</li>').join('')+'</ul>':'<p class="pos"><b>Sem alertas.</b></p>')+hq+he+hs+hb+h;
+  $('chk').innerHTML=(al.length?'<p><b>Alertas ('+al.length+')</b></p>'+auto+'<ul style="margin:6px 0 12px 18px;padding:0;font-size:13px">'+al.map(a=>'<li style="margin:6px 0">'+a+guideHTML(a,al.length<=2)+'</li>').join('')+'</ul>':'<p class="pos"><b>Sem alertas.</b></p>')+hq+he+hs+hb+divNote+h;
   ALERTS=al.length;
   PENDN=al.filter(a=>!/^Anos sem extrato/.test(a)).length+(cfg.chk||[]).length+((()=>{const s0=snapNow();return s0&&snapInfo(s0).missing.length?1:0})());
   const e=document.getElementById('sm_chk');if(e)e.textContent=(al.length?al.length+(al.length===1?' alerta':' alertas'):'Sem alertas')+' · '+stm.length+(stm.length===1?' extrato':' extratos')+' carregados';
