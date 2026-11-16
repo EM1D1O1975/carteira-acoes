@@ -1174,7 +1174,7 @@ function openData(){
   const prN=pr&&pr.data&&Array.isArray(pr.data.ops)?pr.data.ops.length:0,loc=AUTOMIG?readLocal():null,locOk=!!(loc&&hasData(loc));
   const rec=(prN>0||locOk)?'<fieldset><legend>Recuperar</legend>'+(prN>0?'<p class="note">Cópia automática de antes do último reset ('+new Date(pr.at).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'): '+prN+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recpre" class="g">Recuperar dados de antes do reset</button></div>':'')+(locOk?'<p class="note">Cópia guardada neste navegador (antes de usar a conta): '+loc.ops.length+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recloc" class="g">Recuperar a cópia deste navegador</button></div>':'')+'<p class="note" id="recmsg" style="min-height:1.2em"></p></fieldset>':'';
   const nm=LOCALONLY?'<fieldset><legend>O seu nome</legend><div class="exact" style="justify-content:flex-start;flex-wrap:wrap;align-items:center"><input id="whoin" type="text" maxlength="12" placeholder="ex.: Maria" autocomplete="off" style="font-size:15px;padding:8px 10px;min-width:0;flex:1 1 140px"><button type="button" id="whosave" class="g">Guardar nome</button></div><p class="note" style="margin:6px 0 0">Fica só neste aparelho. Serve para lhe dizer, da próxima vez, se está a retomar a sua sessão.</p></fieldset>':'';
-  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 00:45 (recolha num só movimento)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
+  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 10:30 (avisos agrupados)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
   document.body.appendChild(m);
   m.querySelector('#bkgo').onclick=bkDownload;
   m.querySelector('#bkld').onclick=()=>m.querySelector('#bkfile').click();
@@ -1482,12 +1482,21 @@ function alertGuide(a){
     return{where:'o PDF '+yrs.map(y=>pdfDe(y+'-12-31')).join(' e ')+' → «As suas operações» → linhas «DIVIDENDOS CAPITALIZADOS» de '+its.map(i=>i.mes+' de '+i.y).join(', ')+' (uma linha por tranche, em geral 4 a 5 por data, com a data de disponibilidade à direita).',
       fix:'Importe esse extrato: as linhas reais substituem as estimadas e o aviso desaparece.',est,ack:1};
   }
+  if((m=a.match(/^Mesma diferença em (\d+) extratos \((\d{2}\/\d{2}\/\d{4}) a (\d{2}\/\d{2}\/\d{4})\): a página tem ([\d\s.,\u00a0]+) unidades a (menos|mais)/))){
+    const dt=isoFromPt(m[2]),mais=m[5]==='mais',v=+m[4].replace(/[\s\u00a0.]/g,'').replace(',','.'),fd=firstDiff();
+    const caus=mais
+      ?'<li>um movimento <b>repetido</b> (importado duas vezes): veja «As suas operações»;</li><li>um <b>resgate ou venda</b> que ainda não está registado;</li><li>subscrições ou bonificações antigas registadas em <b>números inteiros</b>, quando o fundo atribuiu unidades com decimais (muito comum quando a diferença é pequena, como aqui'+(v<5?'':', embora esta seja maior')+').</li>'
+      :'<li>um <b>ano sem extrato</b> carregado (importe o PDF de 31/12 desse ano);</li><li>um <b>dividendo capitalizado</b> em falta (veja o alerta «Possível dividendo…»);</li><li>subscrições ou bonificações antigas registadas em <b>números inteiros</b>, quando o fundo atribuiu unidades com decimais.</li>';
+    return{where:'o PDF «Posição de conta detalhada em '+m[2]+'» → «Os seus ativos por data de disponibilidade» (total de unidades). A diferença é <b>sempre a mesma</b> desde esse extrato: é <b>um só problema</b>, que nasce nesse ano ou antes. Corrigido, os '+m[1]+' avisos desaparecem juntos.',
+      fix:'<ol style="margin:4px 0 0 18px;padding:0"><li>Importe os extratos de 31/12 dos anos <b>anteriores a '+m[2].slice(6)+'</b> que ainda não tenha (se tiver todos, passe ao ponto seguinte).</li><li>Veja se a causa é uma destas:<ul style="margin:2px 0 2px 16px;padding:0;list-style:disc">'+caus+'</ul></li><li>Se for uma diferença pequena que já confirmou, use o botão abaixo para a aceitar.</li></ol>',
+      est:(!mais&&fd&&fd.dt===dt)?'Ajuste de ≈ <b>'+N(fd.q)+' unid.</b> à data do primeiro extrato, valorizado a '+E(nearPrice(dt).p)+' (fica assinalado como «Ajuste estimado» e sai ao importar extratos). Confiança: baixa. <button class="g" data-chk="estadj">Ajustar provisoriamente</button>':'',ack:1};
+  }
   if((m=a.match(/^Extrato de (\d{2}\/\d{2}\/\d{4}): a página tem ([\d\s.,\u00a0]+) unidades a (menos|mais)/))){
     const dt=isoFromPt(m[1]),fd=firstDiff();
     let est='';
     if(m[3]==='menos')est=(fd&&fd.dt===dt)?'Ajuste de ≈ <b>'+N(fd.q)+' unid.</b> à data deste extrato, valorizado a '+E(nearPrice(dt).p)+' (fica assinalado como «Ajuste estimado» e sai ao importar extratos). Confiança: baixa: não sabemos em que tranche faltam. <button class="g" data-chk="estadj">Ajustar provisoriamente</button>':'Este desvio fecha com o ajuste do primeiro extrato com diferença'+(fd?' ('+D(fd.dt)+')':'')+', ou ao importar os extratos em falta.';
     else est='Diferença a mais: confirme se o mesmo movimento foi importado duas vezes («Operações»).';
-    return{where:'o PDF '+pdfDe(dt)+' → «Os seus ativos por data de disponibilidade» (total e unidades por tranche) e compare com «Repartição das participações → Ajustar por tranche». Causas mais prováveis: (1) dividendos em falta (alerta acima); (2) subscrições e bonificações de anos anteriores registadas em números inteiros, quando o fundo atribui unidades com decimais: procure, nos extratos de 31/12 dos anos em falta, as linhas «SUBSCRIÇÃO SUBSEQUENTE A FUSÃO» e «TRANSFERÊNCIA DA BONIFICAÇÃO».',
+    return{where:'o PDF '+pdfDe(dt)+' → «Os seus ativos por data de disponibilidade» (total e unidades por tranche) e compare com «Repartição das participações → Ajustar por tranche». Causas mais prováveis: '+(m[3]==='menos'?'(1) dividendos em falta (alerta acima); (2)':'(1) um movimento repetido ou um resgate por registar; (2)')+' subscrições e bonificações de anos anteriores registadas em números inteiros, quando o fundo atribui unidades com decimais: procure, nos extratos de 31/12 dos anos em falta, as linhas «SUBSCRIÇÃO SUBSEQUENTE A FUSÃO» e «TRANSFERÊNCIA DA BONIFICAÇÃO».',
       fix:'Importe os extratos de 31/12 dos anos em falta: a diferença fecha sozinha.',est,ack:0};
   }
   if((m=a.match(/^Bonificação atribuída por registar: subscrição de (\d{2}\/\d{2}\/\d{4}) \((.*?) ações, desde (\d{2}\/\d{2}\/\d{4})\)\./))){
@@ -1525,9 +1534,9 @@ function alertGuide(a){
   }
   return null;
 }
-function guideHTML(a){
+function guideHTML(a,open){
   const g=alertGuide(a)||{where:'o extrato (PDF) mais próximo da data ou do ano indicado neste aviso.',fix:'Importe-o em «Importar extrato»; se o aviso se mantiver, corrija o valor à mão em «Nova operação».',ack:1};
-  return '<details class="gd"><summary>Como resolver</summary><div class="gdb"><p><b>Onde procurar:</b> '+g.where+'</p>'+(g.fix?'<p><b>Solução sugerida:</b> '+g.fix+'</p>':'')+(g.est?'<div class="gdest"><b>Alternativa provisória (estimada):</b> '+g.est+'</div>':'')+(g.ack?'<p><button class="g" data-chk="ack" data-key="'+encodeURIComponent(a)+'">Já confirmei: ignorar este aviso</button></p>':'')+'</div></details>';
+  return '<details class="gd"'+(open?' open':'')+'><summary>Como resolver</summary><div class="gdb"><p><b>Onde procurar:</b> '+g.where+'</p>'+(g.fix?'<p><b>Solução sugerida:</b> '+g.fix+'</p>':'')+(g.est?'<div class="gdest"><b>Alternativa provisória (estimada):</b> '+g.est+'</div>':'')+(g.ack?'<p><button class="g" data-chk="ack" data-key="'+encodeURIComponent(a)+'">Já confirmei: ignorar este aviso</button></p>':'')+'</div></details>';
 }
 async function dropEstimates(items){
   const est=ops.filter(o=>o.src==='estimada');if(!est.length)return;
@@ -2031,10 +2040,20 @@ function renderChecks(){
    if(rows.length)hb+='<p><b>Bonificações a rever ('+rows.length+')</b></p>'+table(['Subscrição (qtd.)','Prevista','Registada','Situação',''],rows);
    if((cfg.fx||[]).length)hb+='<p class="note"><b>Correções automáticas recentes:</b><br>'+cfg.fx.slice().reverse().join('<br>')+'</p>';
   }
+  // Diferença repetida em vários extratos = um só problema: junta num único aviso
+  {const re=/^Extrato de (\d{2}\/\d{2}\/\d{4}): a página tem ([\d\s.,\u00a0]+) unidades a (menos|mais) do que o extrato/,gr={};
+   al.forEach((a,i)=>{const m=a.match(re);if(m){const k=m[2].trim()+'|'+m[3];(gr[k]=gr[k]||[]).push({i,dt:m[1]})}});
+   const drop=new Set(),add=[];
+   Object.keys(gr).forEach(k=>{const g=gr[k];if(g.length<2)return;
+     const dts=g.map(x=>x.dt).sort((a,b)=>isoFromPt(a).localeCompare(isoFromPt(b))),[v,dir]=k.split('|');
+     g.forEach(x=>drop.add(x.i));
+     add.push({i:g[0].i,t:'Mesma diferença em '+g.length+' extratos ('+dts[0]+' a '+dts[dts.length-1]+'): a página tem '+v+' unidades a '+dir+' do que a Amundi.'});
+   });
+   if(drop.size){const out=[];al.forEach((a,i)=>{const ad=add.find(x=>x.i===i);if(ad)out.push(ad.t);else if(!drop.has(i))out.push(a)});al.length=0;out.forEach(x=>al.push(x))}}
   {const ak=cfg.ack||[];for(let i=al.length-1;i>=0;i--)if(ak.includes(al[i]))al.splice(i,1)}
   const he=estBlock();
   {const ne=ops.filter(o=>o.src==='estimada').length,ep=document.getElementById('estpill');if(ep){ep.hidden=!ne;ep.textContent='≈ '+ne+(ne===1?' operação estimada':' operações estimadas')}}
-  $('chk').innerHTML=(al.length?'<p><b>Alertas ('+al.length+')</b></p><ul style="margin:6px 0 12px 18px;padding:0;font-size:13px">'+al.map(a=>'<li style="margin:6px 0">'+a+guideHTML(a)+'</li>').join('')+'</ul>':'<p class="pos"><b>Sem alertas.</b></p>')+hq+he+hs+hb+h;
+  $('chk').innerHTML=(al.length?'<p><b>Alertas ('+al.length+')</b></p><ul style="margin:6px 0 12px 18px;padding:0;font-size:13px">'+al.map(a=>'<li style="margin:6px 0">'+a+guideHTML(a,al.length<=2)+'</li>').join('')+'</ul>':'<p class="pos"><b>Sem alertas.</b></p>')+hq+he+hs+hb+h;
   ALERTS=al.length;
   PENDN=al.filter(a=>!/^Anos sem extrato/.test(a)).length+(cfg.chk||[]).length+((()=>{const s0=snapNow();return s0&&snapInfo(s0).missing.length?1:0})());
   const e=document.getElementById('sm_chk');if(e)e.textContent=(al.length?al.length+(al.length===1?' alerta':' alertas'):'Sem alertas')+' · '+stm.length+(stm.length===1?' extrato':' extratos')+' carregados';
