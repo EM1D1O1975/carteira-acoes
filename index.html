@@ -819,6 +819,7 @@ body::before,:root.first body::before{display:none!important}
 #pwah .pb.rdy .no,#pwah .pb.rdy .ok{opacity:1;pointer-events:auto}
 #tinfoT.tglow{animation:tGlow 1.3s ease-in-out 1}
 @keyframes tGlow{0%{box-shadow:0 0 0 0 rgba(255,229,143,.9)}40%{box-shadow:0 0 20px 5px rgba(255,229,143,.9),0 0 0 7px rgba(255,229,143,.35)}100%{box-shadow:0 0 0 12px rgba(255,229,143,0)}}
+#orgpdf.tutdone{opacity:.8;font-size:.92em}#orgpdf.tutdone>summary{font-weight:500}
 </style></head><body><main>
 <div class="top"><span class="tag">Ferramenta pessoal</span>
 <h1>Carteira de ações <b>da empresa</b></h1>
@@ -835,8 +836,24 @@ body::before,:root.first body::before{display:none!important}
 <div id="cfgcard" class="card cfgrail"><div class="cr-in"><div class="cr-k">Cotação VINCI</div><div class="cr-pxw"><span class="cr-pr"><input id="px" class="cr-px" type="text" inputmode="none" readonly tabindex="-1" aria-readonly="true" aria-label="Cotação atual da VINCI em euros (automática)"><span class="cr-eur">€</span></span><span class="cr-var" id="cvar"></span></div><div id="pxinfo" class="pxi"></div><div class="cr-sep"></div><label class="cr-row">Taxa de imposto (%)<input id="rate" type="number" step="0.5" min="0"></label><label class="cr-row">Colaborador<select id="emp"><option value="1">Sim</option><option value="2">Saí (com compensação)</option><option value="0">Saí (demissão/justa causa)</option></select></label><div class="cr-foot"><a href="https://www.google.com/search?q=acoes+vinci" target="_blank" rel="noopener">ver no Google</a></div></div></div>
 
 <details id="impcard" class="card gl cs" open><summary><h2><b>Importar extrato</b>Castor International (Amundi)</h2><span class="sum" id="sm_imp">PDF da Amundi/Castor, Excel, texto colado ou ficheiros arrastados</span></summary>
-<div id="dzrow" class="dzrow"><p class="note wel" id="welcome"><b>Como começar:</b> arraste o seu primeiro extrato para a zona abaixo (ou registe uma operação à mão, mais abaixo). A página lê, organiza e vai mostrar os quadros — posição, resgates, bonificações, verificações — à medida que tiver dados.</p><label id="dz" class="dz"><svg class="marq" aria-hidden="true"><rect/></svg><span class="dzd">Arraste aqui os extratos (PDF ou Excel) ou clique para escolher</span><span class="dzt">Toque para escolher os extratos (PDF ou Excel)</span><small class="dzd">Pode largar vários ficheiros de uma vez. Cada um é acrescentado à lista.</small><input id="pdf" type="file" accept="application/pdf,.txt,.xlsx,.csv" multiple style="display:none"></label></div>
+<div id="tutgate" class="note" hidden style="border:2px solid var(--ac);border-radius:12px;padding:10px 12px;margin:0 0 10px;background:var(--card)"><b>Antes da primeira importação:</b> veja o tutorial de 1 minuto sobre como reunir e organizar os PDF. Só precisa de o ver uma vez. <button type="button" class="g" id="tutgo" style="margin-top:6px">▶ Ver tutorial</button></div><div id="dzrow" class="dzrow"><p class="note wel" id="welcome"><b>Como começar:</b> arraste o seu primeiro extrato para a zona abaixo (ou registe uma operação à mão, mais abaixo). A página lê, organiza e vai mostrar os quadros — posição, resgates, bonificações, verificações — à medida que tiver dados.</p><label id="dz" class="dz"><svg class="marq" aria-hidden="true"><rect/></svg><span class="dzd">Arraste aqui os extratos (PDF ou Excel) ou clique para escolher</span><span class="dzt">Toque para escolher os extratos (PDF ou Excel)</span><small class="dzd">Pode largar vários ficheiros de uma vez. Cada um é acrescentado à lista.</small><input id="pdf" type="file" accept="application/pdf,.txt,.xlsx,.csv" multiple style="display:none"></label></div>
 <details id="fmtinfo" class="fmtinfo"><summary>Que ficheiros posso usar?</summary><div class="fmtb"><p><b>PDF do extrato</b> (recomendado): o que descarrega na área da Castor/Amundi. É o caminho mais simples: a página lê e explica.</p><p><b>Excel (.xlsx) ou CSV</b>, para quem já tem as operações numa folha: precisa das colunas <b>Data, Tipo, Quantidade, Preço unitário</b> (Comissões e Disponível desde são opcionais). O Excel exportado por esta página, na folha «Operações», já tem este formato.</p><p><b>Não são lidos:</b> fotografias, capturas de ecrã e PDFs digitalizados (sem texto), porque um número mal lido estragaria o cálculo.</p><p>Antes de acrescentar, veja sempre o que foi lido e confirme. Nada é guardado sem a sua confirmação.</p><p><button type="button" class="g" id="modelob">Descarregar modelo de Excel</button></p></div></details>
+<details id="orgpdf" class="fmtinfo"><summary>Antes de importar: como reunir e organizar os PDF</summary><div class="fmtb"><ol style="margin:6px 0 8px 18px;padding:0;line-height:1.5">
+<li><b>Entre na sua área pessoal da Amundi</b> (pelo endereço que a sua empresa lhe indicou) e abra <b>Documentos</b>.</li>
+<li><b>Descarregue todos os documentos disponíveis</b>: extratos de conta e avisos de operação. A lista tem várias páginas (1, 2, 3, 4…) e os mais antigos ficam nas últimas.</li>
+<li><b>Dê a cada ficheiro um nome com a data do documento</b>, por exemplo <i>2026-07-31 Extrato.pdf</i> ou <i>2026-07-09 Aviso.pdf</i>. Assim ficam por ordem e, se a página pedir para verificar um documento, encontra-o logo.</li>
+<li><b>Ponha tudo numa só pasta</b> e arraste todos os ficheiros de uma só vez para a zona acima.</li></ol>
+<p class="note">Quantos mais documentos, mais certo o cálculo: um extrato em falta é a causa mais comum de diferenças em relação à Amundi. Os ficheiros são lidos no seu aparelho e não são enviados para lado nenhum.</p>
+<video id="orgvid" controls preload="metadata" playsinline style="width:100%;max-width:420px;border-radius:10px;margin-top:6px;display:none" src="tutorial-extratos.mp4" onerror="this.style.display='none';document.getElementById('orgvm').textContent='O vídeo ainda não está disponível.'"></video><span class="note" id="orgvm"></span>
+<p><button type="button" class="g" id="orgvb">Ver o vídeo de 1 minuto</button></p></div></details>
+<details id="xprep" style="margin:8px 0"><summary><b>Antes de importar: como reunir e organizar os PDF</b></summary>
+<ol style="margin:8px 0 6px 20px;padding:0;font-size:13.5px;line-height:1.55">
+<li><b>Entre na sua área pessoal da Amundi</b> (amundi-ee.com/account) e abra <b>Documentos</b>.</li>
+<li><b>Descarregue todos os documentos disponíveis</b>, dos mais antigos aos mais recentes: os «Extratos de conta» e também os «Avisos de operação». A lista tem várias páginas (1, 2, 3, 4…): percorra-as todas. Quantos mais houver, menos verificações aparecem.</li>
+<li><b>Dê a cada ficheiro um nome com a data do documento</b>, no formato ano-mês-dia, por exemplo <i>2026-07-31 Extrato.pdf</i> ou <i>2026-07-09 Aviso.pdf</i>. Assim ficam por ordem e, se for preciso investigar um deles, sabe logo qual é.</li>
+<li><b>Ponha tudo numa só pasta</b> e arraste os ficheiros de uma vez para a zona de importação acima (ou toque nela para os escolher; pode selecionar vários de uma vez). A ordem não importa, e ficheiros repetidos são ignorados.</li>
+<li><b>Confira a pré-visualização</b> antes de adicionar. Se alguma coisa não bater certo, o nome do ficheiro diz-lhe onde procurar.</li></ol>
+<p class="note">Os ficheiros ficam só no seu aparelho: a plataforma lê-os aqui e não os envia para lado nenhum. Ferramenta não oficial.</p></details>
 <details id="xd"><summary>Ou cole aqui o texto do extrato</summary><textarea id="xtxt" rows="5"></textarea><p><button class="g" id="xread">Ler texto</button></p></details>
 <label style="text-transform:none;font-size:12px;margin-top:8px"><input type="checkbox" id="xsnap" style="width:auto"> Usar o saldo de extrato como saldo inicial (o do primeiro extrato depois de eventuais anos em falta)</label>
 <div id="xprev" style="margin-top:10px"></div>
@@ -1174,7 +1191,7 @@ function openData(){
   const prN=pr&&pr.data&&Array.isArray(pr.data.ops)?pr.data.ops.length:0,loc=AUTOMIG?readLocal():null,locOk=!!(loc&&hasData(loc));
   const rec=(prN>0||locOk)?'<fieldset><legend>Recuperar</legend>'+(prN>0?'<p class="note">Cópia automática de antes do último reset ('+new Date(pr.at).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'): '+prN+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recpre" class="g">Recuperar dados de antes do reset</button></div>':'')+(locOk?'<p class="note">Cópia guardada neste navegador (antes de usar a conta): '+loc.ops.length+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recloc" class="g">Recuperar a cópia deste navegador</button></div>':'')+'<p class="note" id="recmsg" style="min-height:1.2em"></p></fieldset>':'';
   const nm=LOCALONLY?'<fieldset><legend>O seu nome</legend><div class="exact" style="justify-content:flex-start;flex-wrap:wrap;align-items:center"><input id="whoin" type="text" maxlength="12" placeholder="ex.: Maria" autocomplete="off" style="font-size:15px;padding:8px 10px;min-width:0;flex:1 1 140px"><button type="button" id="whosave" class="g">Guardar nome</button></div><p class="note" style="margin:6px 0 0">Fica só neste aparelho. Serve para lhe dizer, da próxima vez, se está a retomar a sua sessão.</p></fieldset>':'';
-  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 14:40 (explicação do dividendo intercalar na conferência)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
+  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 15:40 (tutorial obrigatório antes da 1.ª importação)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
   document.body.appendChild(m);
   m.querySelector('#bkgo').onclick=bkDownload;
   m.querySelector('#bkld').onclick=()=>m.querySelector('#bkfile').click();
@@ -2750,6 +2767,7 @@ async function modeloXlsx(){
   catch(e){msg.textContent=(e&&e.code==='declined')?'':'Não foi possível criar o modelo.'}
 }
 async function handleFiles(all){
+  if(typeof tutLocked==='function'&&tutLocked()){tutShow();return}
   const fs=all.filter(f=>/\.(pdf|txt|xlsx|csv)$/i.test(f.name)||f.type==='application/pdf');
   const rej=all.filter(f=>!fs.includes(f));
   if(!fs.length){if(all.length){const img=rej.some(f=>/^image\//.test(f.type)||/\.(jpe?g|png|heic|webp|gif|bmp)$/i.test(f.name));
@@ -2799,7 +2817,7 @@ $('irs').addEventListener('change',async e=>{
   await saveCfg();renderIrs();
 });
 $('xsnap').onchange=()=>{$('xsnap').dataset.touched='1';if(XP)showX()};
-$('xread').onclick=()=>{if($('xtxt').value.trim()){addX($('xtxt').value,'texto colado');$('xtxt').value=''}showX()};
+$('xread').onclick=()=>{if(tutLocked()){tutShow();return}if($('xtxt').value.trim()){addX($('xtxt').value,'texto colado');$('xtxt').value=''}showX()};
 $('xprev').onclick=async e=>{
   {const xb=e.target.closest?e.target.closest('button[data-xd]'):null;
    if(xb&&XP){const i=+xb.dataset.i,x=XP.doubts[i],a=xb.dataset.xd;if(!x)return;
@@ -2836,6 +2854,26 @@ async function clearStm(){
   $('xmsg').textContent=n+' saldos de extrato apagados.';
 }
 $('chk').addEventListener('click',e=>{if(e.target&&e.target.id==='stmclr')clearStm()});
+let TUTFAIL=false;
+const tutSeen=()=>{try{return localStorage.getItem('vinci_tut')==='1'}catch(e){return false}};
+const tutLocked=()=>!(TUTFAIL||tutSeen()||ALL.length>0||(CFG.main.stm||[]).length>0||(CFG.sim.stm||[]).length>0);
+function tutSync(){
+  const lk=tutLocked(),g=$('tutgate'),dzE=$('dz'),od=$('orgpdf');
+  if(g)g.hidden=!lk;if(dzE)dzE.style.opacity=lk?'.55':'';
+  if(od){const sm=od.querySelector('summary');if(sm)sm.textContent=lk?'Primeiro passo: como reunir e organizar os PDF (veja o vídeo)':'Rever o tutorial: como reunir e organizar os PDF';od.classList.toggle('tutdone',!lk)}
+}
+function tutShow(){
+  const od=$('orgpdf'),v=$('orgvid');if(od)od.open=true;
+  if(v){v.style.display='block';try{v.play()}catch(e){}}
+  try{(od||v).scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}
+}
+{const vb=$('orgvb'),v=$('orgvid'),gb=$('tutgo');
+ if(vb)vb.onclick=tutShow;if(gb)gb.onclick=tutShow;
+ const done=()=>{try{localStorage.setItem('vinci_tut','1')}catch(e){}tutSync();const m=$('orgvm');if(m)m.textContent='Obrigado! Já pode importar os extratos.'};
+ if(v){v.addEventListener('ended',done);v.addEventListener('timeupdate',()=>{if(v.duration>0&&v.currentTime>=v.duration*0.9)done()});
+  v.addEventListener('error',()=>{TUTFAIL=true;tutSync()},true)}
+ const dzl=$('dz');if(dzl)dzl.addEventListener('click',e=>{if(tutLocked()){e.preventDefault();e.stopPropagation();tutShow()}},true);
+ tutSync();setInterval(tutSync,1500)}
 $('xclear').onclick=async()=>{
   const tag=ops.filter(o=>o.src==='extrato');
   const m=(XP?XP.items:[]).concat($('xtxt').value?parseExtrato($('xtxt').value).items:[]);
