@@ -1174,7 +1174,7 @@ function openData(){
   const prN=pr&&pr.data&&Array.isArray(pr.data.ops)?pr.data.ops.length:0,loc=AUTOMIG?readLocal():null,locOk=!!(loc&&hasData(loc));
   const rec=(prN>0||locOk)?'<fieldset><legend>Recuperar</legend>'+(prN>0?'<p class="note">Cópia automática de antes do último reset ('+new Date(pr.at).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'): '+prN+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recpre" class="g">Recuperar dados de antes do reset</button></div>':'')+(locOk?'<p class="note">Cópia guardada neste navegador (antes de usar a conta): '+loc.ops.length+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recloc" class="g">Recuperar a cópia deste navegador</button></div>':'')+'<p class="note" id="recmsg" style="min-height:1.2em"></p></fieldset>':'';
   const nm=LOCALONLY?'<fieldset><legend>O seu nome</legend><div class="exact" style="justify-content:flex-start;flex-wrap:wrap;align-items:center"><input id="whoin" type="text" maxlength="12" placeholder="ex.: Maria" autocomplete="off" style="font-size:15px;padding:8px 10px;min-width:0;flex:1 1 140px"><button type="button" id="whosave" class="g">Guardar nome</button></div><p class="note" style="margin:6px 0 0">Fica só neste aparelho. Serve para lhe dizer, da próxima vez, se está a retomar a sua sessão.</p></fieldset>':'';
-  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 12:35 (explicação da diferença com a Amundi)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
+  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 13:20 (limpar importações também limpa os saldos dos extratos)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
   document.body.appendChild(m);
   m.querySelector('#bkgo').onclick=bkDownload;
   m.querySelector('#bkld').onclick=()=>m.querySelector('#bkfile').click();
@@ -2828,10 +2828,14 @@ $('xclear').onclick=async()=>{
   if(!del.length){
     if(WS==='sim'&&ops.length){await resetWS('sim');return}   // o Reset pede a sua própria confirmação
     $('xmsg').textContent=ops.length?'Não há importações de extrato para limpar (os restantes registos são manuais). Para apagar tudo, use o Reset.':'Não há importações do extrato para limpar.';return}
-  if(!(await ask('Remover '+del.length+' operações importadas do extrato?')))return;
+  if(!(await ask('Remover '+del.length+' operações importadas do extrato? Pode anular logo a seguir no botão verde (canto inferior direito).')))return;
+  const nst=(cfg.stm||[]).length;
+  pushUndo();UBATCH++;try{
   if(col){for(const o of del){try{await col.doc(o.id).delete()}catch(e){}}}
   else{const ids=new Set(del.map(o=>o.id));ALL=ALL.filter(o=>!ids.has(o.id));saveLocal();render()}
-  $('xmsg').textContent=del.length+' operações removidas.';XP=null;$('xprev').innerHTML='';
+  if(nst){cfg.stm=[];await saveCfg();ALL=ALL;render()}   // saldos dos extratos importados saem com as operações (senão cada um ficaria a acusar diferença)
+  }finally{UBATCH--}
+  $('xmsg').textContent=del.length+' operações removidas'+(nst?' e '+nst+' saldos de extrato':'')+'. Para repor, use o botão verde de anular ou importe de novo os PDF.';XP=null;$('xprev').innerHTML='';
 };
 $('wmain').onclick=()=>setWS('main');$('wsim').onclick=()=>setWS('sim');
 $('wban').onclick=async e=>{
