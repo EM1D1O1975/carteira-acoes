@@ -451,7 +451,7 @@ th,td{padding:6px 7px}
 .topgrid>#impcard,.topgrid.solo>#impcard{grid-row:2;border-radius:16px!important}
 #cfgcard .cr-in{position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:min(26vh,190px) auto auto auto;column-gap:0;row-gap:0;padding:0;height:auto;box-sizing:border-box;pointer-events:none}
 #cfgcard .cr-in>*{pointer-events:auto;position:relative;z-index:1}
-#cfgcard .cr-in::before{content:"";grid-row:1;grid-column:1/-1;background:var(--mascote) no-repeat 73% center/contain;pointer-events:none;display:block!important}
+#cfgcard .cr-in::before{content:"";grid-row:1;grid-column:1/-1;background:var(--mascote) no-repeat 73% center/auto 56%;pointer-events:none;display:block!important}
 #cfgcard .cr-in::after{content:"";grid-row:2/5;grid-column:1/-1;border:1px solid rgba(188,214,143,.28);border-radius:10px;background:rgba(255,255,255,.04);pointer-events:none;z-index:0}
 #cfgcard .cr-sep{display:none}
 #cfgcard .cr-k{position:absolute;left:0;top:calc(min(26vh,190px)/2 - 32px);width:130px;font-size:10px;letter-spacing:.1em;line-height:1.2}
@@ -540,7 +540,7 @@ th,td{padding:6px 7px}
 .topgrid>#impcard,.topgrid.solo>#impcard{grid-row:2;border-radius:16px!important}
 #cfgcard .cr-in{position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:min(26vh,190px) auto auto auto;column-gap:0;row-gap:0;padding:0;height:auto;box-sizing:border-box;pointer-events:none}
 #cfgcard .cr-in>*{pointer-events:auto;position:relative;z-index:1}
-#cfgcard .cr-in::before{content:"";grid-row:1;grid-column:1/-1;background:var(--mascote) no-repeat 73% center/contain;pointer-events:none;display:block!important}
+#cfgcard .cr-in::before{content:"";grid-row:1;grid-column:1/-1;background:var(--mascote) no-repeat 73% center/auto 56%;pointer-events:none;display:block!important}
 #cfgcard .cr-in::after{content:"";grid-row:2/5;grid-column:1/-1;border:1px solid rgba(188,214,143,.28);border-radius:10px;background:rgba(255,255,255,.04);pointer-events:none;z-index:0}
 #cfgcard .cr-sep{display:none}
 #cfgcard .cr-k{position:absolute;left:0;top:calc(min(26vh,190px)/2 - 32px);width:130px;font-size:10px;letter-spacing:.1em;line-height:1.2}
@@ -796,6 +796,22 @@ body::before,:root.first body::before{display:none!important}
 .top .whoav .orb i{text-shadow:0 0 calc(6px + var(--gl,0)*14px) rgba(255,205,70,calc(.75 + var(--gl,0)*.25)),0 1px 2px rgba(0,0,0,.8)}
 /* sem o logótipo opaco como fundo (só fica durante a animação de abertura) */
 :root:not(.intro):not(.zz) body::before{opacity:0!important}
+/* Cotação: logo quadrado encostado à direita; o cartão ocupa o espaço restante, com a mesma altura */
+#cfgcard .cr-in{--S:clamp(116px,32vw,150px);--H:var(--S);--G:14px;grid-template-rows:calc(var(--H) + 24px) auto auto auto!important}
+#cfgcard .cr-in::before{background-size:calc(var(--S)*1.25) calc(var(--S)*1.25)!important;background-position:right calc(var(--S)*-0.1) center!important}
+#cfgcard .cr-pxw{left:0!important;right:calc(var(--S) + var(--G))!important;width:auto!important;height:var(--H)!important;top:calc((var(--H) + 24px)/2)!important;box-sizing:border-box!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;padding:20px 12px 8px!important;gap:4px!important;border-radius:calc(var(--H)*.14)!important;min-width:0!important;max-width:none!important}
+#cfgcard .cr-pxw .cr-pr{display:flex;align-items:baseline;gap:4px}
+#cfgcard .cr-px{font-size:clamp(30px,9.6vw,38px)!important}
+#cfgcard .cr-eur{font-size:clamp(16px,5vw,20px)!important}
+#cfgcard .cr-var{font-size:clamp(14px,4.2vw,17px)!important}
+#cfgcard .cr-pxw::after{position:absolute;right:calc(var(--S)*.1);top:calc(var(--S)*.09);margin:0!important}
+#cfgcard .cr-k{left:0!important;right:calc(var(--S) + var(--G))!important;width:auto!important;top:calc((var(--H) + 24px)/2 - var(--H)*.39)!important;text-align:center;z-index:2}
+@media(min-width:700px){
+#cfgcard .cr-in{--S:132px;--H:132px}
+#cfgcard .cr-pxw{flex-direction:row!important;justify-content:space-evenly!important;padding:0 24px 0 130px!important;gap:12px!important}
+#cfgcard .cr-k{right:auto!important;left:36px!important;width:auto!important;top:calc((var(--S) + 24px)/2)!important;transform:translateY(-50%);font-size:12px}
+#cfgcard .cr-px{font-size:56px!important}#cfgcard .cr-eur{font-size:28px!important}#cfgcard .cr-var{font-size:22px!important}
+#cfgcard .cr-pxw::after{position:static;margin:0!important}}
 .bkhi{animation:bkhi 2.6s ease}
 @keyframes bkhi{0%,70%{box-shadow:0 0 0 3px #f2b832,0 0 18px rgba(242,184,50,.8)}100%{box-shadow:0 0 0 0 transparent}}
 .top h1{padding-right:90px}
@@ -1211,7 +1227,7 @@ function openData(){
   const prN=pr&&pr.data&&Array.isArray(pr.data.ops)?pr.data.ops.length:0,loc=AUTOMIG?readLocal():null,locOk=!!(loc&&hasData(loc));
   const rec=(prN>0||locOk)?'<fieldset><legend>Recuperar</legend>'+(prN>0?'<p class="note">Cópia automática de antes do último reset ('+new Date(pr.at).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'): '+prN+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recpre" class="g">Recuperar dados de antes do reset</button></div>':'')+(locOk?'<p class="note">Cópia guardada neste navegador (antes de usar a conta): '+loc.ops.length+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recloc" class="g">Recuperar a cópia deste navegador</button></div>':'')+'<p class="note" id="recmsg" style="min-height:1.2em"></p></fieldset>':'';
   const nm=LOCALONLY?'<fieldset><legend>O seu nome</legend><div class="exact" style="justify-content:flex-start;flex-wrap:wrap;align-items:center"><input id="whoin" type="text" maxlength="12" placeholder="ex.: Maria" autocomplete="off" style="font-size:15px;padding:8px 10px;min-width:0;flex:1 1 140px"><button type="button" id="whosave" class="g">Guardar nome</button></div><p class="note" style="margin:6px 0 0">Fica só neste aparelho. Serve para lhe dizer, da próxima vez, se está a retomar a sua sessão.</p></fieldset>':'';
-  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-16 22:45 (sem logótipo opaco de fundo)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
+  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-17 00:55 (logo original, cotação a ocupar o espaço restante)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
   document.body.appendChild(m);
   m.querySelector('#bkgo').onclick=bkDownload;
   m.querySelector('#bkld').onclick=()=>m.querySelector('#bkfile').click();
@@ -1850,6 +1866,7 @@ function fitPx(){
 }
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>fitPx());
 window.addEventListener('resize',()=>fitPx());
+setTimeout(()=>fitPx(),300);
 function qVar(){const s=qState();return s.pct!=null?'<span class="'+(s.pct>0?'pos':s.pct<0?'neg':'')+'">'+(s.pct>0?'▲ +':s.pct<0?'▼ −':'')+qNf(Math.abs(s.pct))+' %</span> · ':''}
 function qOpen(){const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Paris',weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());const g=k=>(p.find(x=>x.type===k)||{}).value,wd=g('weekday');if(wd==='Sat'||wd==='Sun')return false;const t=(+g('hour')%24)*60+(+g('minute'));return t>=540&&t<=1055}
 function qAgo(ts){const m=Math.max(0,Math.round((Date.now()-ts)/60000));if(m<1)return 'agora mesmo';if(m<60)return 'há '+m+' min';const h=Math.floor(m/60);if(h<24)return 'há '+h+(h===1?' hora':' horas');const d=Math.floor(h/24);return 'há '+d+(d===1?' dia':' dias')}
