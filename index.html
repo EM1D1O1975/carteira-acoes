@@ -2462,8 +2462,18 @@ function render0(){
   const ys={};c.real.forEach(r=>{const y=r.sd.slice(0,4);(ys[y]=ys[y]||{rev:0,cost:0,g:0,gt:0});ys[y].rev+=r.rev;ys[y].cost+=r.cost;ys[y].g+=r.g;ys[y].gt+=r.gt});
   $('years').innerHTML=table(['Ano','Valor de realização','Valor de aquisição','Mais-valia','Imposto estimado'],
     Object.keys(ys).sort().map(y=>{const a=ys[y];return '<tr><td>'+y+'</td><td>'+E(a.rev)+'</td><td>'+E(a.cost)+'</td><td class="'+cls(a.g)+'">'+E(a.g)+'</td><td>'+E(Math.max(0,a.gt)*rate)+'</td></tr>'}));
-  $('open').innerHTML=table(['Data compra','Qtd. restante','Custo unitário','Custo total','Valor atual','Mais-valia latente'],
-    c.lots.map(l=>{const v=l.q*px,g=v-l.q*l.u;return '<tr><td>'+chip(l.t)+' '+D(l.d)+'</td><td>'+N(l.q)+'</td><td>'+E(l.u)+'</td><td>'+E(l.q*l.u)+'</td><td>'+(px?E(v):'—')+'</td><td class="'+(px?cls(g):'')+'">'+(px?E(g):'—')+'</td></tr>'}));
+  const oRow=(l,sub,k)=>{const v=l.q*px,g=v-l.q*l.u;return '<tr'+(sub?' class="sub" data-gp="'+k+'"'+(GRPOPEN.has(k)?'':' hidden'):'')+'><td>'+(sub?'↳ ':'')+chip(l.t)+' '+D(l.d)+'</td><td>'+N(l.q)+'</td><td>'+E(l.u)+'</td><td>'+E(l.q*l.u)+'</td><td>'+(px?E(v):'—')+'</td><td class="'+(px?cls(g):'')+'">'+(px?E(g):'—')+'</td></tr>'};
+  const oG={};c.lots.forEach(l=>{if(l.t==='D')(oG[l.d]=oG[l.d]||[]).push(l)});
+  const oRows=[],oSeen=new Set();
+  c.lots.forEach(l=>{
+    if(l.t==='D'&&oG[l.d].length>1){
+      if(oSeen.has(l.d))return;oSeen.add(l.d);
+      const g=oG[l.d],k='o'+l.d,q=g.reduce((a,y)=>a+y.q,0),cost=g.reduce((a,y)=>a+y.q*y.u,0),v=q*px,gn=v-cost,open=GRPOPEN.has(k);
+      oRows.push('<tr class="gm" data-g="'+k+'" title="Toque para ver as linhas originais"><td>'+chip('D')+' '+D(l.d)+' <span class="gb">'+g.length+' linhas somadas '+(open?'▾':'▸')+'</span></td><td>'+N(q)+'</td><td>'+E(q?cost/q:0)+'</td><td>'+E(cost)+'</td><td>'+(px?E(v):'—')+'</td><td class="'+(px?cls(gn):'')+'">'+(px?E(gn):'—')+'</td></tr>');
+      g.forEach(y=>oRows.push(oRow(y,true,k)));
+    }else oRows.push(oRow(l,false));
+  });
+  $('open').innerHTML=table(['Data compra','Qtd. restante','Custo unitário','Custo total','Valor atual','Mais-valia latente'],oRows);
 }
 
 $('add').onclick=async()=>{
@@ -2488,6 +2498,7 @@ $('doimp').onclick=async()=>{
 $('pend').onclick=e=>{const id=e.target.dataset&&e.target.dataset.reg;if(!id)return;
   const o=ops.find(x=>x.id===id);if(!o)return;refId=id;$('t').value='B';$('d').value=o.disp||add3(o.d);$('q').value=e.target.dataset.b||bonOf(o);$('p').value='';$('f').value=0;$('p').focus();
   $('err').textContent='Indique o preço unitário do dia da atribuição e clique em Adicionar.'};
+$('open').onclick=e=>{const tr=e.target.closest?e.target.closest('tr[data-g]'):null;if(!tr)return;const k=tr.dataset.g;if(GRPOPEN.has(k))GRPOPEN.delete(k);else GRPOPEN.add(k);render()};
 $('emp').onchange=e=>{cfg.emp=+e.target.value;render();saveCfg()};
 $('txs').onclick=async e=>{
   const d=e.target.dataset||{};
