@@ -995,12 +995,12 @@ function ask(msg){return new Promise(ok=>{
 })}
 let ALL=[],ops=[],CFG={main:{px:0,rate:28,emp:1},sim:{px:0,rate:28,emp:1}},cfg=CFG.main,WS='main',col=null,refId=null;
 try{if(localStorage.getItem('vinci_ws')==='sim')WS='sim'}catch(e){}
-let MISSDIV=[],RESETTING=false,GLOWSTOP=false,IMPDONE=false,INTRODONE=false,DOCKPEND=false,UND={main:[],sim:[]},UBATCH=0,PENDN=0,CHKTOP=false,SECPRIO=false,CHKOPENN=0,GRPOPEN=new Set(),QREF=null,QLIVE=null,PEND=[],TRROWS=[],ALERTS=0,SNAPDT='',HISTNEW=[];
+let SIMPX=0,MISSDIV=[],RESETTING=false,GLOWSTOP=false,IMPDONE=false,INTRODONE=false,DOCKPEND=false,UND={main:[],sim:[]},UBATCH=0,PENDN=0,CHKTOP=false,SECPRIO=false,CHKOPENN=0,GRPOPEN=new Set(),QREF=null,QLIVE=null,PEND=[],TRROWS=[],ALERTS=0,SNAPDT='',HISTNEW=[];
 // última cotação conhecida (22/10/2026, 13:25, Google Finance): garante que o widget mostra sempre um valor
 const QDEF={px:113.7,px2:113.7,at:1794242128000,src:'Yahoo Finance (última referência conhecida)',prev:111.6,w52lo:104.25,w52hi:143.15,chg:2.1,pct:1.88};
 const QS=()=>{if(QLIVE)return QLIVE;return(QREF&&+QREF.px>0&&(+QREF.at||0)>=QDEF.at)?QREF:QDEF};
 const pxMan=()=>false;
-const view=()=>{cfg=CFG[WS];ops=ALL.filter(o=>(o.ws||'main')===WS);const Q=QS();if(Q&&+Q.px>0&&!pxMan()){cfg.px=+Q.px;cfg.px2=+Q.px2||0;cfg.pxAt=Q.at||0}};
+const view=()=>{cfg=CFG[WS];ops=ALL.filter(o=>(o.ws||'main')===WS);const Q=QS();if(Q&&+Q.px>0&&!pxMan()){cfg.px=+Q.px;cfg.px2=+Q.px2||0;cfg.pxAt=Q.at||0}if(WS==='sim'&&SIMPX>0){cfg.px=SIMPX;cfg.px2=SIMPX}};
 const bonusFor=n=>{n=Math.min(Math.floor(n)||0,100);return Math.floor(2*Math.min(n,10)+Math.max(0,Math.min(n-10,30))+0.5*Math.max(0,n-40))};
 let bqManual=false;
 const add3=d=>(+d.slice(0,4)+3)+d.slice(4);
@@ -1010,7 +1010,8 @@ const TODAY=new Date().toISOString().slice(0,10);
 
 /* --- armazenamento: conta (db) ou, em alternativa, este navegador --- */
 function loadLocal(){try{const o=JSON.parse(localStorage.getItem('vinci_multi')||'{}');ALL=o.ops||[];Object.assign(CFG.main,o.cfg||{});Object.assign(CFG.sim,o.cfgSim||{})}catch(e){}}
-function saveLocal(){try{localStorage.setItem('vinci_multi',JSON.stringify({ops:ALL,cfg:CFG.main,cfgSim:CFG.sim,at:Date.now()}))}catch(e){}}
+const simClean=()=>{if(!(SIMPX>0))return CFG.sim;const Q=QS();return Object.assign({},CFG.sim,{px:+Q.px||0,px2:+Q.px2||+Q.px||0})};
+function saveLocal(){try{localStorage.setItem('vinci_multi',JSON.stringify({ops:ALL,cfg:CFG.main,cfgSim:simClean(),at:Date.now()}))}catch(e){}}
 let CLOUDFAILED=false;
 const LOCALONLY=typeof PERSONAL==='undefined'||!PERSONAL;
 const AUTOMIG=typeof PERSONAL!=='undefined'&&PERSONAL;
@@ -1232,7 +1233,7 @@ function openData(){
   const prN=pr&&pr.data&&Array.isArray(pr.data.ops)?pr.data.ops.length:0,loc=AUTOMIG?readLocal():null,locOk=!!(loc&&hasData(loc));
   const rec=(prN>0||locOk)?'<fieldset><legend>Recuperar</legend>'+(prN>0?'<p class="note">Cópia automática de antes do último reset ('+new Date(pr.at).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'): '+prN+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recpre" class="g">Recuperar dados de antes do reset</button></div>':'')+(locOk?'<p class="note">Cópia guardada neste navegador (antes de usar a conta): '+loc.ops.length+' operações.</p><div class="exact" style="justify-content:flex-start"><button type="button" id="recloc" class="g">Recuperar a cópia deste navegador</button></div>':'')+'<p class="note" id="recmsg" style="min-height:1.2em"></p></fieldset>':'';
   const nm=LOCALONLY?'<fieldset><legend>O seu nome</legend><div class="exact" style="justify-content:flex-start;flex-wrap:wrap;align-items:center"><input id="whoin" type="text" maxlength="12" placeholder="ex.: Maria" autocomplete="off" style="font-size:15px;padding:8px 10px;min-width:0;flex:1 1 140px"><button type="button" id="whosave" class="g">Guardar nome</button></div><p class="note" style="margin:6px 0 0">Fica só neste aparelho. Serve para lhe dizer, da próxima vez, se está a retomar a sua sessão.</p></fieldset>':'';
-  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-17 10:00 (tabelas largas deslizam dentro das caixas no telemóvel) (logo original, cotação a ocupar o espaço restante)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
+  m.innerHTML='<div class="exbox"><h3>Os meus dados</h3><p style="font-size:13.5px;line-height:1.5;margin:6px 0">'+st+'</p><p class="note">Versão desta página: 2026-11-17 11:15 (cotação editável só na simulação)</p><p class="note">Agora: <span id="datacount">'+ALL.length+' operações e '+((CFG.main.stm||[]).length)+' extratos</span>.</p>'+nm+rec+ajBlock()+'<fieldset><legend>Cópia de segurança</legend><p class="note">Um ficheiro com as operações, os totais dos extratos e as definições. Não inclui os PDF nem nomes ou números de conta. Serve para guardar uma cópia ou levar os dados para outro aparelho.</p><div class="exact" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" id="bkgo">Guardar cópia</button><button type="button" id="bkld" class="g">Carregar cópia</button><input type="file" id="bkfile" accept=".json,application/json" hidden></div><p class="note" id="bkmsg" style="min-height:1.2em"></p></fieldset></div>';
   document.body.appendChild(m);
   m.querySelector('#bkgo').onclick=bkDownload;
   m.querySelector('#bkld').onclick=()=>m.querySelector('#bkfile').click();
@@ -1256,7 +1257,7 @@ async function addOp(x){
   if(col){await col.doc('op'+Date.now()+Math.random().toString(36).slice(2,6)).set(x)}
   else{ALL.push(Object.assign({id:'l'+Date.now()+Math.random()},x));saveLocal();render()}
 }
-async function saveCfg(){if(col){try{await col.doc(WS==='sim'?'cfgsim':'cfg').set(cfg)}catch(e){}}else saveLocal()}
+async function saveCfg(){if(col){try{await col.doc(WS==='sim'?'cfgsim':'cfg').set(WS==='sim'?simClean():cfg)}catch(e){}}else saveLocal()}
 
 /* --- cálculo FIFO --- */
 const addY=(d,n)=>{const x=new Date(d+'T12:00:00Z');x.setUTCFullYear(x.getUTCFullYear()+n);return x.toISOString().slice(0,10)};
@@ -1311,7 +1312,7 @@ function renderSim(){
     (sq>P.avail+1e-9?'<p class="warn">Só tem '+N(P.avail)+' ações livres; '+N(sq-P.avail)+' ficam cativas (capital subscrito nos últimos 3 anos'+(P.unlock?', livre a partir de '+D(P.unlock):'')+').</p>':'')+
     (rows.length?'<div class="fl"><span>Valor bruto do resgate</span><b>'+E(rev)+'</b></div><div class="fl"><span>Mais-valia</span><b class="'+cls(g)+'">'+E(g)+'</b></div><div class="fl"><span>Imposto estimado ('+N(rate*100)+'%'+(cfg.excl?', com exclusão parcial':'')+')</span><b>'+E(tax)+'</b></div><div class="fl"><span>Líquido depois de imposto</span><b>'+E(rev-tax)+'</b></div>':'');
 }
-function setWS(w){WS=w;try{localStorage.setItem('vinci_ws',w)}catch(e){}XP=null;$('xprev').innerHTML='';$('xmsg').textContent='';render()}
+function setWS(w){WS=w;SIMPX=0;try{localStorage.setItem('vinci_ws',w)}catch(e){}XP=null;$('xprev').innerHTML='';$('xmsg').textContent='';render()}
 function wsUI(){
   $('wmain').classList.toggle('on',WS==='main');$('wsim').classList.toggle('on',WS==='sim');
   $('wban').innerHTML=simBanner();
@@ -2391,7 +2392,8 @@ function fixKnown(){
 }
 function render(){view();render0();renderSim();renderRep();renderSums();renderChecks();renderPair();renderOrigin();renderHist();renderDiv();renderAmu();renderSnap();renderExcl();renderWho();renderQChip();renderAjuda();renderImpState();renderIrs();renderVis();applyDim();fixKnown();balanceTop();wsUI();pxInfo();if(!FIXING&&fixPlan().length){FIXING=true;setTimeout(async()=>{try{await autoFixBonus()}finally{FIXING=false}},0)}}
 function render0(){
-  $('px').value=cfg.px>0?cfg.px.toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2}):'';
+  if(document.activeElement!==$('px'))$('px').value=cfg.px>0?cfg.px.toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2}):'';
+  simPxUI();
   fitPx();
   if(document.activeElement!==$('rate'))$('rate').value=cfg.rate;
   $('emp').value=String(cfg.emp===0?0:cfg.emp===2?2:1);
@@ -3016,6 +3018,23 @@ $('trch').addEventListener('click',async e=>{
 $('pav').oninput=e=>{cfg.pav=+e.target.value;renderRep()};$('pav').onchange=saveCfg;
 $('pu').oninput=e=>{cfg.pu=+e.target.value;renderRep()};$('pu').onchange=saveCfg;
 $('px').readOnly=true;
+function simPxUI(){
+  const e=$('px'),sim=WS==='sim';
+  e.readOnly=!sim;e.setAttribute('aria-readonly',sim?'false':'true');
+  e.setAttribute('inputmode',sim?'decimal':'none');e.setAttribute('tabindex',sim?'0':'-1');
+  e.setAttribute('aria-label',sim?'Cotação da simulação (editável, só aqui)':'Cotação atual da VINCI em euros (automática)');
+  let n=document.getElementById('simpxn');
+  if(!n){n=document.createElement('div');n.id='simpxn';n.className='note';n.style.cssText='margin:6px 4px 0;text-align:center';$('cfgcard').insertAdjacentElement('afterend',n)}
+  if(!sim){n.hidden=true;return}
+  n.hidden=false;
+  n.innerHTML=SIMPX>0?'<b>Cotação editada só nesta simulação.</b> Não altera «Os meus registos» e volta ao valor da página principal ao sair. <a href="#" id="simpxr">Repor agora</a>':'Pode escrever aqui outra cotação para simular. Só vale nesta simulação e não altera a página principal.';
+  const r=document.getElementById('simpxr');if(r)r.onclick=ev=>{ev.preventDefault();SIMPX=0;render()};
+}
+$('px').addEventListener('click',e=>{if(WS==='sim')e.stopPropagation()});
+$('px').addEventListener('focus',e=>{if(WS==='sim')setTimeout(()=>{try{e.target.select()}catch(x){}},0)});
+$('px').addEventListener('input',e=>{if(WS!=='sim')return;const v=qNum(e.target.value);SIMPX=v>0?v:0;if(v>0){cfg.px=v;cfg.px2=v}fitPx();render()});
+$('px').addEventListener('blur',()=>{if(WS==='sim')render()});
+$('px').addEventListener('keydown',e=>{if(WS==='sim'&&e.key==='Enter'){e.preventDefault();e.target.blur()}});
 $('rate').oninput=e=>{cfg.rate=+e.target.value;render()};
 $('rate').onchange=saveCfg;
 async function saveCfgFor(w){if(col){try{await col.doc(w==='sim'?'cfgsim':'cfg').set(CFG[w])}catch(e){}}else saveLocal()}
