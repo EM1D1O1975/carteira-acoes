@@ -38,3 +38,10 @@ Esta versão atualiza a cotação da ação sozinha:
 - Na primeira visita pode escolher um **guia passo a passo** ou ir direto ao assunto («Já conheço o plano»). O guia pode ser escondido ou voltar a ser ligado em «Os meus dados».
 - Cada termo técnico tem um **ⓘ** com uma explicação curta e uma ligação ao glossário.
 - A folha **Simulação** serve para experimentar «e se…» sem alterar os registos reais. Tem um **exemplo com dados fictícios** para aprender a usar a ferramenta.
+
+
+## Tabelas de IRS (`irs.json`)
+
+- Os escalões, taxas e dedução específica de cada ano estão no ficheiro `irs.json`. A página lê-o ao abrir e, se falhar, usa os valores que já tem.
+- Para acrescentar ou corrigir um ano, edite `irs.json` no GitHub (cada ano tem 8 limites, 9 taxas, a dedução e a data de referência `ref`). Valores incoerentes são ignorados.
+- O título e a tabela da secção «Estimativa do IRS anual» seguem sempre o ano em uso; se faltar o ano pedido, a página avisa que está a usar o último ano disponível.

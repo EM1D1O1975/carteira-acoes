@@ -2280,10 +2280,25 @@ function renderVis(){
 let IRSY='';
 const IRSTAB={
   2025:{de:4350.24,lim:[8059,12160,17233,22306,28400,41629,44987,83696],tx:[12.5,16,21.5,24.4,31.4,34.9,43.1,44.6,48]},
-  2026:{de:4587.09,lim:[8342,12587,17838,23089,29397,43090,46566,86634],tx:[12.2,15.2,20.7,23.6,30.6,34.6,43.1,44.6,48]}
+  2026:{de:4587.09,lim:[8342,12587,17838,23089,29397,43090,46566,86634],tx:[12.2,15.2,20.7,23.6,30.6,34.6,43.1,44.6,48],ref:'2026-11-05',deOk:false}
 };
 const fl=(a,b)=>'<div class="fl"><span>'+a+'</span><b>'+b+'</b></div>';
-function irsTab(y){return (cfg.tab&&cfg.tab[y])||IRSTAB[y]||IRSTAB[2026]}
+function irsTabYear(y){const ks=Object.keys(IRSTAB).map(Number).sort((a,b)=>a-b);if(IRSTAB[y])return +y;const m=ks.filter(k=>k<=+y);return m.length?m[m.length-1]:ks[ks.length-1]}
+function irsTab(y){return (cfg.tab&&cfg.tab[y])||IRSTAB[irsTabYear(y)]}
+// tabelas de IRS: o ficheiro irs.json (no repositório) pode acrescentar ou atualizar anos; só entra o que for coerente
+async function irsFetchJson(){
+  try{
+    const r=await fetch('irs.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;
+    const j=await r.json(),T=j&&j.tabelas;if(!T)return;let mud=false;
+    Object.keys(T).forEach(y=>{const t=T[y];
+      const ok=/^\d{4}$/.test(y)&&t&&Array.isArray(t.lim)&&t.lim.length===8&&Array.isArray(t.tx)&&t.tx.length===9&&t.lim.every((v,i)=>+v>0&&(i===0||+v>+t.lim[i-1]))&&t.tx.every(v=>+v>0&&+v<=60)&&+t.de>0;
+      if(!ok)return;
+      const n={de:+t.de,lim:t.lim.map(Number),tx:t.tx.map(Number),ref:t.ref||'',deOk:t.deOk!==false};
+      if(JSON.stringify(IRSTAB[y])!==JSON.stringify(n)){IRSTAB[y]=n;mud=true}});
+    if(mud)render();
+  }catch(e){}
+}
+irsFetchJson();
 function irsOf(col,t){let tax=0,prev=0;for(let i=0;i<t.lim.length;i++){const up=t.lim[i];if(col>up){tax+=(up-prev)*t.tx[i]/100;prev=up}else{return tax+(col-prev)*t.tx[i]/100}}return tax+(col-prev)*t.tx[t.tx.length-1]/100}
 function irsEst(y,e,bonus){
   const t=irsTab(y),n=e.conj?2:1;
@@ -2294,9 +2309,9 @@ function irsEst(y,e,bonus){
   return{a,b,porAcoes:a.coleta-b.coleta,saldo:a.coleta-(+e.ret||0)};
 }
 function irsTabHtml(y){
-  const t=irsTab(y);
+  const t=irsTab(y),ty=irsTabYear(y);
   const rows=t.tx.map((x,i)=>'<tr><td>'+(i+1)+'.º</td><td>'+(i<t.lim.length?'<input type="number" step="1" data-tb="lim'+i+'" value="'+t.lim[i]+'" style="width:110px">':'acima do anterior')+'</td><td><input type="number" step="0.1" data-tb="tx'+i+'" value="'+x+'" style="width:80px"> %</td></tr>');
-  return '<details style="margin-top:8px"><summary>Escalões e dedução específica usados em '+y+' (editáveis)</summary>'+table(['Escalão','Rendimento coletável até (€)','Taxa'],rows)+'<div class="row" style="margin-top:8px"><div><label>Dedução específica (€)</label><input type="number" step="0.01" data-tb="de" value="'+t.de+'"></div></div><p class="note">Valores de referência públicos para '+y+' (limites do OE 2026 e taxas após a atualização de setembro de 2026). Podem mudar: corrija aqui se a Autoridade Tributária indicar outros.</p></details>';
+  return '<details style="margin-top:8px"><summary>Escalões e dedução específica usados em '+y+' (editáveis)</summary>'+table(['Escalão','Rendimento coletável até (€)','Taxa'],rows)+'<div class="row" style="margin-top:8px"><div><label>Dedução específica (€)</label><input type="number" step="0.01" data-tb="de" value="'+t.de+'"></div></div><p class="note">'+(ty!==+y?'<b>Ainda não há escalões de '+y+': estão a ser usados os de '+ty+'.</b> ':'')+'Valores de referência públicos para '+ty+(t.ref?' (data de referência: '+D(t.ref)+')':'')+'. '+(t.deOk===false?'A dedução específica ainda está por confirmar numa fonte oficial. ':'')+'Podem mudar: corrija aqui se a Autoridade Tributária indicar outros.</p></details>';
 }
 function irsEstHtml(y,bonus,tax28){
   const e=Object.assign({r:'',ss:'',qs:'',ret:'',ded:'',dep:'',conj:0},(cfg.est||{})[y]||{});

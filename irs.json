@@ -1,0 +1,31 @@
+{
+ "tabelas": {
+  "2026": {
+   "ref": "2026-11-05",
+   "fonte": "Decreto-Lei n.º 212/2026 (art. 68.º do CIRS), segundo simula.pt; dedução específica ainda por confirmar",
+   "deOk": false,
+   "de": 4587.09,
+   "lim": [
+    8342,
+    12587,
+    17838,
+    23089,
+    29397,
+    43090,
+    46566,
+    86634
+   ],
+   "tx": [
+    12.2,
+    15.2,
+    20.7,
+    23.6,
+    30.6,
+    34.6,
+    43.1,
+    44.6,
+    48
+   ]
+  }
+ }
+}
